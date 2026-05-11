@@ -1,0 +1,6 @@
+- prefab: RWB_Ravenwood_Seed
+  filter: int, treeRespawner, 1
+  remove: true
+  type: change, picked 0
+  spawn:
+  - prefab: <string_respawnprefab>
