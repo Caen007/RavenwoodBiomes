@@ -9,6 +9,10 @@ namespace Ravenwood.Biomes
         public const string PlaceSfxPrefabName = "sfx_build_cultivator";
         public const string PlaceSfxFallbackPrefabName = "sfx_build_hammer_wood";
 
+        public const string PickSfxPrefabName = "sfx_pickable_pick";
+        public const string PickSfxFallbackPrefabName = "sfx_item_pickup";
+        public const string PickSfxFallbackPrefabNameAlt = "sfx_gui_craftitem";
+
         public const string HitSfxPrefabName = "sfx_tree_hit_abomination";
         public const string HitSfxFallbackPrefabName = "sfx_tree_hit";
         public const string HitSfxFallbackPrefabNameAlt = "sfx_wood_hit";
@@ -72,6 +76,8 @@ namespace Ravenwood.Biomes
             "RWB_Mushroom7",
             "RWB_Mushroom8",
             "RWB_Purple_Mushroom",
+            "RWB_Pickable_Green_Mushroom",
+            "RWB_Pickable_Purple_Mushroom",
             "RWB_ScaledMushroom1",
             "RWB_ScaledMushroom2",
             "RWB_ScaledMushroom3",
@@ -109,6 +115,16 @@ namespace Ravenwood.Biomes
             "RWB_ScaledPlant13",
             "RWB_ScaledPlant14",
             "RWB_ScaledPlant15"
+        };
+
+        // Add or remove prefab names here to control which prefabs use pick-up sound.
+        private static readonly HashSet<string> PickFeedbackPrefabs = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "Pickable_Mushroom",
+            "Pickable_Mushroom_yellow",
+            "Pickable_Mushroom_blue",
+            "RWB_Pickable_Green_Mushroom",
+            "RWB_Pickable_Purple_Mushroom"
         };
 
         // Add or remove prefab names here to control which prefabs use axe-hit sound.
@@ -410,6 +426,16 @@ namespace Ravenwood.Biomes
             }
 
             SpawnFirstAvailable(position, rotation, PlaceSfxPrefabName, PlaceSfxFallbackPrefabName);
+        }
+
+        public static void PlayPick(string prefabName, Vector3 position, Quaternion rotation)
+        {
+            if (!PickFeedbackPrefabs.Contains(CleanPrefabName(prefabName)))
+            {
+                return;
+            }
+
+            SpawnFirstAvailable(position, rotation, PickSfxPrefabName, PickSfxFallbackPrefabName, PickSfxFallbackPrefabNameAlt);
         }
 
         public static void PlayHit(string prefabName, Vector3 position, Quaternion rotation)

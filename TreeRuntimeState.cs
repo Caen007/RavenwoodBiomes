@@ -17,6 +17,9 @@ namespace Ravenwood.Biomes
         private static readonly MethodInfo GetRightItemMethod = AccessTools.Method(typeof(Humanoid), "GetRightItem");
         private static readonly MethodInfo PieceGetCreatorMethod = AccessTools.Method(typeof(Piece), "GetCreator");
         private static readonly FieldInfo PickableAmountField = AccessTools.Field(typeof(Pickable), "m_amount");
+        private static readonly MethodInfo RaiseSkillMethod = AccessTools.Method(typeof(Character), "RaiseSkill", new[] { typeof(Skills.SkillType), typeof(float) }) ??
+            AccessTools.Method(typeof(Player), "RaiseSkill", new[] { typeof(Skills.SkillType), typeof(float) });
+        private static readonly object FarmingSkillType = ResolveFarmingSkillType();
         private static readonly int RemoveRayMask = LayerMask.GetMask("piece", "piece_nonsolid", "item", "Default_small", "Default", "static_solid");
         private static Piece cachedValidatedRemovePiece;
 
@@ -466,6 +469,18 @@ namespace Ravenwood.Biomes
             }
         }
 
+        private static object ResolveFarmingSkillType()
+        {
+            try
+            {
+                return Enum.Parse(typeof(Skills.SkillType), "Farming");
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         private static bool IsCultivatorPickableMushroomName(string prefabName)
         {
             return string.Equals(prefabName, "Pickable_Mushroom", StringComparison.Ordinal) ||
@@ -623,6 +638,36 @@ namespace Ravenwood.Biomes
             }
 
             return added;
+        }
+
+        private static void PlayPickedMushroomFeedback(Pickable pickable)
+        {
+            if (pickable == null || pickable.gameObject == null)
+            {
+                return;
+            }
+
+            TreeFeedbackEffects.PlayPick(
+                CleanPrefabName(pickable.gameObject.name),
+                pickable.transform.position,
+                pickable.transform.rotation);
+        }
+
+        private static void RaisePickedMushroomFarmingSkill(Humanoid character)
+        {
+            Player player = character as Player;
+            if (player == null || RaiseSkillMethod == null || FarmingSkillType == null)
+            {
+                return;
+            }
+
+            try
+            {
+                RaiseSkillMethod.Invoke(player, new[] { FarmingSkillType, (object)1f });
+            }
+            catch
+            {
+            }
         }
 
         private static long GetPieceCreator(Piece targetPiece)
@@ -950,6 +995,8 @@ namespace Ravenwood.Biomes
                     return false;
                 }
 
+                PlayPickedMushroomFeedback(__instance);
+                RaisePickedMushroomFarmingSkill(character);
                 DestroyPickedPlayerPlacedMushroom(__instance);
                 __result = true;
                 return false;
@@ -1048,6 +1095,12 @@ namespace Ravenwood.Biomes
                 TreeRuntimeState runtime = __instance.GetComponent<TreeRuntimeState>();
                 if (runtime == null)
                 {
+                    string prefabName = CleanPrefabName(__instance.gameObject.name);
+                    if (IsCultivatorPickableMushroomName(prefabName))
+                    {
+                        TreeFeedbackEffects.PlayPlace(prefabName, __instance.transform.position, __instance.transform.rotation);
+                    }
+
                     return;
                 }
 
