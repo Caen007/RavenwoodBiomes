@@ -862,7 +862,7 @@ namespace Ravenwood.Biomes
 
             itemDrop.m_autoPickup = true;
             itemDrop.m_autoDestroy = true;
-            itemDrop.m_itemData = CreateMushroomItemData(prefab, displayName, description, icon, existingShared);
+            itemDrop.m_itemData = CreateMushroomItemData(prefab, prefabName, displayName, description, icon, existingShared);
         }
 
         private static ItemDrop.ItemData CreateSeedItemData(GameObject prefab, Sprite icon)
@@ -979,7 +979,7 @@ namespace Ravenwood.Biomes
             return itemData;
         }
 
-        private static ItemDrop.ItemData CreateMushroomItemData(GameObject prefab, string displayName, string description, Sprite icon, ItemDrop.ItemData.SharedData existingShared)
+        private static ItemDrop.ItemData CreateMushroomItemData(GameObject prefab, string prefabName, string displayName, string description, Sprite icon, ItemDrop.ItemData.SharedData existingShared)
         {
             ItemDrop.ItemData itemData = new ItemDrop.ItemData();
             itemData.m_dropPrefab = prefab;
@@ -1003,9 +1003,26 @@ namespace Ravenwood.Biomes
             shared.m_useDurability = false;
             shared.m_destroyBroken = false;
             shared.m_canBeReparied = false;
-            shared.m_food = shared.m_food > 0f ? shared.m_food : 15f;
-            shared.m_foodStamina = shared.m_foodStamina > 0f ? shared.m_foodStamina : 15f;
-            shared.m_foodEitr = Mathf.Max(0f, shared.m_foodEitr);
+
+            if (string.Equals(prefabName, TreeRegistrar.GreenMushroomItemPrefabName, StringComparison.Ordinal))
+            {
+                shared.m_food = 30f;
+                shared.m_foodStamina = 10f;
+                shared.m_foodEitr = 0f;
+            }
+            else if (string.Equals(prefabName, TreeRegistrar.PurpleMushroomItemPrefabName, StringComparison.Ordinal))
+            {
+                shared.m_food = 22f;
+                shared.m_foodStamina = 22f;
+                shared.m_foodEitr = 22f;
+            }
+            else
+            {
+                shared.m_food = shared.m_food > 0f ? shared.m_food : 15f;
+                shared.m_foodStamina = shared.m_foodStamina > 0f ? shared.m_foodStamina : 15f;
+                shared.m_foodEitr = Mathf.Max(0f, shared.m_foodEitr);
+            }
+
             shared.m_foodBurnTime = shared.m_foodBurnTime > 0f ? shared.m_foodBurnTime : 900f;
             shared.m_foodRegen = shared.m_foodRegen > 0f ? shared.m_foodRegen : 1f;
             shared.m_attackForce = Mathf.Max(0f, shared.m_attackForce);
