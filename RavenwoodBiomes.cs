@@ -8,6 +8,7 @@ namespace Ravenwood.Biomes
 {
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
+    [BepInDependency("JamesJonesTV.RavenwoodPotions", BepInDependency.DependencyFlags.SoftDependency)]
     public class RavenwoodBiomes : BaseUnityPlugin
     {
         public const string PluginGUID = "Ravenwood.Biomes";
