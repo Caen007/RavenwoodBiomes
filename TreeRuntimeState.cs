@@ -15,6 +15,7 @@ namespace Ravenwood.Biomes
 
         private static readonly FieldInfo RightItemField = AccessTools.Field(typeof(Humanoid), "m_rightItem");
         private static readonly MethodInfo GetRightItemMethod = AccessTools.Method(typeof(Humanoid), "GetRightItem");
+        private static readonly MethodInfo PieceGetCreatorMethod = AccessTools.Method(typeof(Piece), "GetCreator");
         private static readonly int RemoveRayMask = LayerMask.GetMask("piece", "piece_nonsolid", "item", "Default_small", "Default", "static_solid");
         private static Piece cachedValidatedRemovePiece;
 
@@ -464,6 +465,128 @@ namespace Ravenwood.Biomes
             }
         }
 
+        private static bool IsCultivatorPickableMushroomName(string prefabName)
+        {
+            return string.Equals(prefabName, "Pickable_Mushroom", StringComparison.Ordinal) ||
+                   string.Equals(prefabName, "Pickable_Mushroom_yellow", StringComparison.Ordinal) ||
+                   string.Equals(prefabName, "Pickable_Mushroom_blue", StringComparison.Ordinal) ||
+                   string.Equals(prefabName, TreeRegistrar.GreenMushroomPrefabName, StringComparison.Ordinal) ||
+                   string.Equals(prefabName, TreeRegistrar.PurpleMushroomPrefabName, StringComparison.Ordinal);
+        }
+
+        private static bool IsPlayerPlacedPickableMushroom(Pickable pickable)
+        {
+            if (pickable == null)
+            {
+                return false;
+            }
+
+            string prefabName = CleanPrefabName(pickable.gameObject.name);
+            if (!IsCultivatorPickableMushroomName(prefabName))
+            {
+                return false;
+            }
+
+            Piece pickablePiece = pickable.GetComponent<Piece>();
+            if (pickablePiece == null)
+            {
+                return false;
+            }
+
+            long creator = GetPieceCreator(pickablePiece);
+            if (creator != 0L)
+            {
+                return true;
+            }
+
+            TreeRuntimeState runtime = pickable.GetComponent<TreeRuntimeState>();
+            return runtime != null && runtime.IsPlayerPlaced();
+        }
+
+        private static long GetPieceCreator(Piece targetPiece)
+        {
+            if (targetPiece == null || PieceGetCreatorMethod == null)
+            {
+                return 0L;
+            }
+
+            try
+            {
+                object value = PieceGetCreatorMethod.Invoke(targetPiece, null);
+                if (value is long longValue)
+                {
+                    return longValue;
+                }
+
+                if (value is int intValue)
+                {
+                    return intValue;
+                }
+            }
+            catch
+            {
+            }
+
+            return 0L;
+        }
+
+        private static bool TryClaimObjectOwnership(GameObject targetObject)
+        {
+            if (targetObject == null)
+            {
+                return false;
+            }
+
+            ZNetView targetZNetView = targetObject.GetComponent<ZNetView>();
+            if (targetZNetView == null || !targetZNetView.IsValid())
+            {
+                return true;
+            }
+
+            if (ZNet.instance != null && ZNet.instance.IsServer())
+            {
+                return true;
+            }
+
+            if (!targetZNetView.IsOwner())
+            {
+                targetZNetView.ClaimOwnership();
+            }
+
+            return targetZNetView.IsOwner();
+        }
+
+        private static void DestroyPickedPlayerPlacedMushroom(Pickable pickable)
+        {
+            if (pickable == null || pickable.gameObject == null)
+            {
+                return;
+            }
+
+            GameObject targetObject = pickable.gameObject;
+            if (!TryClaimObjectOwnership(targetObject))
+            {
+                return;
+            }
+
+            Collider[] colliders = targetObject.GetComponentsInChildren<Collider>(true);
+            for (int i = 0; i < colliders.Length; i++)
+            {
+                if (colliders[i] != null)
+                {
+                    colliders[i].enabled = false;
+                }
+            }
+
+            if (ZNetScene.instance != null)
+            {
+                ZNetScene.instance.Destroy(targetObject);
+                return;
+            }
+
+            UnityEngine.Object.Destroy(targetObject);
+        }
+
         private static bool IsCultivator(ItemDrop.ItemData item)
         {
             if (item == null)
@@ -687,6 +810,20 @@ namespace Ravenwood.Biomes
             }
 
             return cleaned;
+        }
+
+        [HarmonyPatch(typeof(Pickable), "Interact")]
+        private static class Pickable_Interact_Patch
+        {
+            private static void Postfix(Pickable __instance, bool __result)
+            {
+                if (!__result || !IsPlayerPlacedPickableMushroom(__instance))
+                {
+                    return;
+                }
+
+                DestroyPickedPlayerPlacedMushroom(__instance);
+            }
         }
 
         [HarmonyPatch(typeof(WearNTear), "RPC_Damage")]
