@@ -838,11 +838,16 @@ namespace Ravenwood.Biomes
             }
 
             prefab.name = prefabName;
-            SetLayerRecursively(prefab, "item");
-            EnsureSolidColliders(prefab);
-            EnsureSeedRigidbody(prefab);
-            RemoveSeedPiece(prefab);
-            RemovePickables(prefab);
+
+            bool keepUnityDropSetup = string.Equals(prefabName, TreeRegistrar.GreenMushroomItemPrefabName, StringComparison.Ordinal);
+            if (!keepUnityDropSetup)
+            {
+                SetLayerRecursively(prefab, "item");
+                EnsureSolidColliders(prefab);
+                EnsureSeedRigidbody(prefab);
+                RemoveSeedPiece(prefab);
+                RemovePickables(prefab);
+            }
 
             ZNetView znv = prefab.GetComponent<ZNetView>();
             if (znv == null)
@@ -865,8 +870,12 @@ namespace Ravenwood.Biomes
                 ? itemDrop.m_itemData.m_shared
                 : null;
 
-            itemDrop.m_autoPickup = true;
-            itemDrop.m_autoDestroy = true;
+            if (!keepUnityDropSetup)
+            {
+                itemDrop.m_autoPickup = true;
+                itemDrop.m_autoDestroy = true;
+            }
+
             itemDrop.m_itemData = CreateMushroomItemData(prefab, prefabName, displayName, description, icon, existingShared);
         }
 
@@ -1014,6 +1023,7 @@ namespace Ravenwood.Biomes
                 shared.m_food = 30f;
                 shared.m_foodStamina = 10f;
                 shared.m_foodEitr = 0f;
+                ClearGreenMushroomConsumeEffects(shared);
             }
             else if (string.Equals(prefabName, TreeRegistrar.PurpleMushroomItemPrefabName, StringComparison.Ordinal))
             {
@@ -1037,6 +1047,37 @@ namespace Ravenwood.Biomes
 
             itemData.m_shared = shared;
             return itemData;
+        }
+
+        private static void ClearGreenMushroomConsumeEffects(ItemDrop.ItemData.SharedData shared)
+        {
+            if (shared == null)
+            {
+                return;
+            }
+
+            string[] effectFieldNames =
+            {
+                "m_consumeStatusEffect",
+                "m_equipStatusEffect",
+                "m_setStatusEffect",
+                "m_attackStatusEffect"
+            };
+
+            Type sharedType = shared.GetType();
+            for (int i = 0; i < effectFieldNames.Length; i++)
+            {
+                FieldInfo effectField = sharedType.GetField(
+                    effectFieldNames[i],
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+                if (effectField == null || !typeof(ScriptableObject).IsAssignableFrom(effectField.FieldType))
+                {
+                    continue;
+                }
+
+                effectField.SetValue(shared, null);
+            }
         }
 
         private static Sprite LoadIconSprite(AssetBundle bundle, string assetName)
