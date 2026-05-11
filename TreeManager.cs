@@ -838,6 +838,11 @@ namespace Ravenwood.Biomes
             }
 
             prefab.name = prefabName;
+            SetLayerRecursively(prefab, "item");
+            EnsureSolidColliders(prefab);
+            EnsureSeedRigidbody(prefab);
+            RemoveSeedPiece(prefab);
+            RemovePickables(prefab);
 
             ZNetView znv = prefab.GetComponent<ZNetView>();
             if (znv == null)

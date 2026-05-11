@@ -100,7 +100,7 @@ namespace Ravenwood.Biomes
                 "RP_PotionMinorDefense",
                 1,
                 Req(3, "Essence_Poison"),
-                Req(3, "Mushroom"),
+                Req(3, "RWB_Green_Mushroom", "GreenMushroom"),
                 Req(3, "Raspberry"),
                 Req(3, "Coal")),
 
@@ -109,7 +109,7 @@ namespace Ravenwood.Biomes
                 "RP_PotionMinorIntellect",
                 1,
                 Req(3, "Essence_Frost"),
-                Req(3, "Mushroom"),
+                Req(3, "MushroomBlue", "BlueMushroom"),
                 Req(3, "Raspberry"),
                 Req(3, "NeckTail", "NeckTails")),
 
@@ -118,7 +118,7 @@ namespace Ravenwood.Biomes
                 "RP_PotionMinorAgility",
                 1,
                 Req(3, "Essence_Lightning"),
-                Req(3, "Mushroom"),
+                Req(3, "MushroomYellow", "YellowMushroom"),
                 Req(3, "Raspberry"),
                 Req(3, "Honey")),
 
@@ -128,7 +128,7 @@ namespace Ravenwood.Biomes
                 "RP_PotionMediumFortitude",
                 1,
                 Req(5, "Essence_Fire"),
-                Req(5, "MushroomYellow", "YellowMushroom"),
+                Req(5, "Mushroom"),
                 Req(5, "Blueberries"),
                 Req(5, "Thistle")),
 
@@ -137,7 +137,7 @@ namespace Ravenwood.Biomes
                 "RP_PotionMediumDefense",
                 1,
                 Req(5, "Essence_Poison"),
-                Req(5, "MushroomYellow", "YellowMushroom"),
+                Req(5, "RWB_Green_Mushroom", "GreenMushroom"),
                 Req(5, "Blueberries"),
                 Req(5, "Guck")),
 
@@ -146,7 +146,7 @@ namespace Ravenwood.Biomes
                 "RP_PotionMediumIntellect",
                 1,
                 Req(5, "Essence_Frost"),
-                Req(5, "MushroomYellow", "YellowMushroom"),
+                Req(5, "MushroomBlue", "BlueMushroom"),
                 Req(5, "Blueberries"),
                 Req(5, "GreydwarfEye", "GreydwarfEyes", "Greydwarf Eyes")),
 
@@ -165,7 +165,7 @@ namespace Ravenwood.Biomes
                 "RP_PotionMajorFortitude",
                 1,
                 Req(8, "Essence_Fire"),
-                Req(8, "MushroomBlue", "BlueMushroom"),
+                Req(8, "Mushroom"),
                 Req(8, "Cloudberry", "Cloudberries"),
                 Req(8, "MushroomJotunPuffs", "JotunPuffs", "Jotunnpuffs")),
 
@@ -174,7 +174,7 @@ namespace Ravenwood.Biomes
                 "RP_PotionMajorDefense",
                 1,
                 Req(8, "Essence_Poison"),
-                Req(8, "MushroomBlue", "BlueMushroom"),
+                Req(8, "RWB_Green_Mushroom", "GreenMushroom"),
                 Req(8, "Cloudberry", "Cloudberries"),
                 Req(8, "Tar")),
 
@@ -192,7 +192,7 @@ namespace Ravenwood.Biomes
                 "RP_PotionMajorAgility",
                 1,
                 Req(8, "Essence_Lightning"),
-                Req(8, "MushroomBlue", "BlueMushroom"),
+                Req(8, "MushroomYellow", "YellowMushroom"),
                 Req(8, "Cloudberry", "Cloudberries"),
                 Req(8, "Onion", "Onions")),
 
@@ -202,7 +202,7 @@ namespace Ravenwood.Biomes
                 "RP_PotionMythicFortitude",
                 1,
                 Req(10, "Essence_Fire"),
-                Req(10, "MushroomSmokePuff", "SmokePuff", "SmokePuffs"),
+                Req(10, "Mushroom"),
                 Req(10, "Vineberry", "Vineberries"),
                 Req(10, "Fiddleheadfern", "Fiddlehead", "Fiddleheads")),
 
@@ -211,7 +211,7 @@ namespace Ravenwood.Biomes
                 "RP_PotionMythicDefense",
                 1,
                 Req(10, "Essence_Poison"),
-                Req(10, "MushroomSmokePuff", "SmokePuff", "SmokePuffs"),
+                Req(10, "RWB_Green_Mushroom", "GreenMushroom"),
                 Req(10, "Vineberry", "Vineberries"),
                 Req(10, "Sap")),
 
@@ -220,7 +220,7 @@ namespace Ravenwood.Biomes
                 "RP_PotionMythicIntellect",
                 1,
                 Req(10, "Essence_Frost"),
-                Req(10, "MushroomSmokePuff", "SmokePuff", "SmokePuffs"),
+                Req(10, "MushroomBlue", "BlueMushroom"),
                 Req(10, "Vineberry", "Vineberries"),
                 Req(10, "MushroomMagecap", "Magecap", "Magecaps")),
 
@@ -229,9 +229,9 @@ namespace Ravenwood.Biomes
                 "RP_PotionMythicAgility",
                 1,
                 Req(10, "Essence_Lightning"),
-                Req(10, "MushroomSmokePuff", "SmokePuff", "SmokePuffs"),
+                Req(10, "MushroomYellow", "YellowMushroom"),
                 Req(10, "Vineberry", "Vineberries"),
-                Req(10, "RoyalJelly", "Royal Jelly"))
+                Req(10, "MushroomSmokePuff", "SmokePuff", "SmokePuffs"))
         };
 
         public static void Initialize()
