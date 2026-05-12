@@ -49,7 +49,7 @@ namespace Ravenwood.Biomes
                 return;
             }
 
-            PrepareWorkbenchPrefab(prefab);
+            PrepareWorkbenchPrefab(prefab, bundle);
             registeredWorkbenchPrefab = prefab;
 
             PieceConfig pieceConfig = new PieceConfig();
@@ -65,7 +65,7 @@ namespace Ravenwood.Biomes
             TryCopyVanillaWorkbenchCraftEffects();
         }
 
-        private static void PrepareWorkbenchPrefab(GameObject prefab)
+        private static void PrepareWorkbenchPrefab(GameObject prefab, AssetBundle bundle)
         {
             if (prefab == null)
             {
@@ -78,7 +78,7 @@ namespace Ravenwood.Biomes
             EnsureNetworkComponents(prefab);
             EnsurePieceComponent(prefab);
             EnsureWearNTear(prefab);
-            EnsureCraftingStation(prefab);
+            EnsureCraftingStation(prefab, bundle);
         }
 
         private static RequirementConfig[] CreateWorkbenchRequirements()
@@ -133,7 +133,7 @@ namespace Ravenwood.Biomes
             wear.m_noRoofWear = true;
         }
 
-        private static void EnsureCraftingStation(GameObject prefab)
+        private static void EnsureCraftingStation(GameObject prefab, AssetBundle bundle)
         {
             CraftingStation station = prefab.GetComponent<CraftingStation>();
             if (station == null)
@@ -142,6 +142,7 @@ namespace Ravenwood.Biomes
             }
 
             SetFieldIfExists(station, "m_name", WorkbenchDisplayName);
+            SetFieldIfExists(station, "m_icon", LoadIconSprite(bundle, WorkbenchPrefabName));
             SetFieldIfExists(station, "m_discoverRange", DiscoverRange);
             SetFieldIfExists(station, "m_rangeBuild", BuildRange);
             SetFieldIfExists(station, "m_useDistance", UseDistance);
