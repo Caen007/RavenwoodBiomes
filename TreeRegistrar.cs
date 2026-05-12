@@ -174,56 +174,56 @@ namespace Ravenwood.Biomes
                 prefabName: "RWB_Mushroom1", displayName: "Ravenwood Mushroom I.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin: 3, defaultDropMax: 5),
 
             CreateDefaultRegistration(
                 //11
                 prefabName: "RWB_Mushroom2", displayName: "Ravenwood Mushroom II.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin: 3, defaultDropMax: 5),
 
             CreateDefaultRegistration(
                 //12
                 prefabName: "RWB_Mushroom3", displayName: "Ravenwood Mushroom III.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //10
                 prefabName: "RWB_Mushroom4", displayName: "Ravenwood Mushroom IV.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //11
                 prefabName: "RWB_Mushroom5", displayName: "Ravenwood Mushroom V.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //12
                 prefabName: "RWB_Mushroom6", displayName: "Ravenwood Mushroom VI.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //18
                 prefabName: "RWB_Mushroom7", displayName: "Ravenwood Mushroom VII.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //18
                 prefabName: "RWB_Mushroom8", displayName: "Ravenwood Mushroom VIII.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             //<<<<<<<< FUNGI >>>>>>>
 
@@ -232,49 +232,49 @@ namespace Ravenwood.Biomes
                 prefabName: "RWB_Fungi1", displayName: "Ravenwood Fungi I.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 2),
+                defaultDropMin: 3, defaultDropMax: 5),
 
             CreateDefaultRegistration(
                 //02
                 prefabName: "RWB_Fungi2", displayName: "Ravenwood Fungi II.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 2),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //06
                 prefabName: "RWB_Fungi3", displayName: "Ravenwood Fungi III.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 2),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //07
                 prefabName: "RWB_Fungi4", displayName: "Ravenwood Fungi IV.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 2),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //08
                 prefabName: "RWB_Fungi5", displayName: "Ravenwood Fungi V.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 2),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //09
                 prefabName: "RWB_Fungi6", displayName: "Ravenwood Fungi VI.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 2),
+                defaultDropMin : 3, defaultDropMax : 5),
 
                         CreateDefaultRegistration(
                 //10
                 prefabName: "RWB_Fungi7", displayName: "Ravenwood Fungi VII.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 2),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             //<<<<<<<< PLANTS >>>>>>>
 
@@ -283,119 +283,119 @@ namespace Ravenwood.Biomes
                 prefabName: "RWB_Plant1", displayName: "Ravenwood Plant I.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 1),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //02
                 prefabName: "RWB_Plant2", displayName: "Ravenwood Plant II.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 1),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //03
                 prefabName: "RWB_Plant3", displayName: "Ravenwood Plant III.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 1),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //04
                 prefabName: "RWB_Plant4", displayName: "Ravenwood Plant IV.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 1),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //05
                 prefabName: "RWB_Plant5", displayName: "Ravenwood Plant V.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 1),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //06
                 prefabName: "RWB_Plant6", displayName: "Ravenwood Plant VI.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 1),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //03
                 prefabName: "RWB_Plant7", displayName: "Ravenwood Plant VII.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 1),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //04
                 prefabName: "RWB_Plant8", displayName: "Ravenwood Plant VIII.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 1),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //05
                 prefabName: "RWB_Plant9", displayName: "Ravenwood Plant IX.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 1),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //09
                 prefabName: "RWB_Plant10", displayName: "Ravenwood Plant X.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 1),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //13
                 prefabName: "RWB_Plant11", displayName: "Ravenwood Plant XI.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 1),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //14
                 prefabName: "RWB_Plant12", displayName: "Ravenwood Plant XII.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 1),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //15
                 prefabName: "RWB_Plant13", displayName: "Ravenwood Plant XIII.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 1),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //16
                 prefabName: "RWB_Plant14", displayName: "Ravenwood Plant XIV.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 1),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //17
                 prefabName: "RWB_Plant15", displayName: "Ravenwood Plant XV.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 1),
+                defaultDropMin : 3, defaultDropMax : 5),
 
             CreateDefaultRegistration(
                 //18
                 prefabName: "RWB_Plant16", displayName: "Ravenwood Plant XVI.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 1),
+                defaultDropMin : 3, defaultDropMax : 5),
 
                         CreateDefaultRegistration(
-                //18
+                //19
                 prefabName: "RWB_Plant17", displayName: "Ravenwood Plant XVII.",
                 category: RavenwoodBiomes.GetPreferredCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 1),
+                defaultDropMin: 3, defaultDropMax: 5),
 
                         //<<<<<<<< Grass >>>>>>>
 
@@ -473,42 +473,42 @@ namespace Ravenwood.Biomes
                 prefabName: "RWB_ScaledMushroom1", displayName: "Ravenwood Scaled Mushroom I.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 2, defaultDropMax: 5),
+                defaultDropMin: 5, defaultDropMax: 8),
 
                 CreateScaledRegistration(
                 //02
                 prefabName: "RWB_ScaledMushroom2", displayName: "Ravenwood Scaled Mushroom VII.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 2, defaultDropMax: 5),
+                defaultDropMin: 5, defaultDropMax: 8),
 
                 CreateScaledRegistration(
                 //03
                 prefabName: "RWB_ScaledMushroom3", displayName: "Ravenwood Scaled Mushroom III.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 2, defaultDropMax: 5),
+                defaultDropMin: 5, defaultDropMax: 8),
 
                 CreateScaledRegistration(
                 //04
                 prefabName: "RWB_ScaledMushroom4", displayName: "Ravenwood Scaled Mushroom IV.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 2, defaultDropMax: 5),
+                defaultDropMin: 5, defaultDropMax: 8),
 
                 CreateScaledRegistration(
                 //05
                 prefabName: "RWB_ScaledMushroom7", displayName: "Ravenwood Scaled Mushroom VII.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 2, defaultDropMax: 5),
+                defaultDropMin: 5, defaultDropMax: 8),
 
                             CreateScaledRegistration(
                 //06
                 prefabName: "RWB_ScaledMushroom8", displayName: "Ravenwood Scaled Mushroom VIII.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin: 5, defaultDropMax: 8),
                 
                 //<<<<<<<< SCALED FUNGI >>>>>>>
             
@@ -517,35 +517,35 @@ namespace Ravenwood.Biomes
                 prefabName: "RWB_ScaledFungi1", displayName: "Ravenwood Scaled Fungi I.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 2, defaultDropMax: 5),
+                defaultDropMin : 5, defaultDropMax : 8),
 
             CreateScaledRegistration(
                 //02
                 prefabName: "RWB_ScaledFungi3", displayName: "Ravenwood Scaled Fungi III.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 2, defaultDropMax: 5),
+                defaultDropMin : 5, defaultDropMax : 8),
 
                       CreateScaledRegistration(
                 //03
                 prefabName: "RWB_ScaledFungi4", displayName: "Ravenwood Scaled Fungi IV.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 2, defaultDropMax: 5),
+                defaultDropMin : 5, defaultDropMax : 8),
 
              CreateScaledRegistration(
                 //04
                 prefabName: "RWB_ScaledFungi6", displayName: "Ravenwood Scaled Fungi VI.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 2, defaultDropMax: 5),
+                defaultDropMin : 5, defaultDropMax : 8),
 
              CreateScaledRegistration(
                 //05
                 prefabName: "RWB_ScaledFungi7", displayName: "Ravenwood Scaled Fungi VII.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 2, defaultDropMax: 5),
+                defaultDropMin : 5, defaultDropMax : 8),
 
 
 
@@ -556,14 +556,14 @@ namespace Ravenwood.Biomes
                 prefabName: "RWB_ScaledPlant1", displayName: "Ravenwood Scaled Plant I.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 5, defaultDropMax : 8),
 
             CreateScaledRegistration(
                 //02
                 prefabName: "RWB_ScaledPlant2", displayName: "Ravenwood Scaled Plant II.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 5, defaultDropMax : 8),
 
                 //03
 
@@ -572,84 +572,84 @@ namespace Ravenwood.Biomes
                 prefabName: "RWB_ScaledPlant4", displayName: "Ravenwood Scaled Plant IV.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 5, defaultDropMax : 8),
 
             CreateScaledRegistration(
                 //05
                 prefabName: "RWB_ScaledPlant7", displayName: "Ravenwood Scaled Plant VII.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 5, defaultDropMax : 8),
 
             CreateScaledRegistration(
                 //06
                 prefabName: "RWB_ScaledPlant8", displayName: "Ravenwood Scaled Plant VIII.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 5, defaultDropMax : 8),
 
             CreateScaledRegistration(
                 //07
                 prefabName: "RWB_ScaledPlant9", displayName: "Ravenwood Scaled Plant IX.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 5, defaultDropMax : 8),
 
             CreateScaledRegistration(
                 //08
                 prefabName: "RWB_ScaledPlant10", displayName: "Ravenwood Scaled Plant X.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 5, defaultDropMax : 8),
 
             CreateScaledRegistration(
                 //09
                 prefabName: "RWB_ScaledPlant11", displayName: "Ravenwood Scaled Plant XI.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 5, defaultDropMax : 8),
 
             CreateScaledRegistration(
                 //10
                 prefabName: "RWB_ScaledPlant12", displayName: "Ravenwood Scaled Plant XII.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 5, defaultDropMax : 8),
 
             CreateScaledRegistration(
                 //11
                 prefabName: "RWB_ScaledPlant13", displayName: "Ravenwood Scaled Plant XIII.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 5, defaultDropMax : 8),
 
             CreateScaledRegistration(
                 //12
                 prefabName: "RWB_ScaledPlant14", displayName: "Ravenwood Scaled Plant XIV.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 5, defaultDropMax : 8),
 
             CreateScaledRegistration(
                 //13
                 prefabName: "RWB_ScaledPlant15", displayName: "Ravenwood Scaled Plant XV.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 5, defaultDropMax : 8),
 
             CreateScaledRegistration(
                 //14
                 prefabName: "RWB_ScaledPlant16", displayName: "Ravenwood Scaled Plant XVI.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 5, defaultDropMax : 8),
 
                         CreateScaledRegistration(
                 //15
                 prefabName: "RWB_ScaledPlant17", displayName: "Ravenwood Scaled Plant XVII.",
                 category: RavenwoodBiomes.GetScaledCategoryName(),
                 defaultDropItem: "Mushroom",
-                defaultDropMin: 1, defaultDropMax: 3),
+                defaultDropMin : 5, defaultDropMax : 8),
 
 
            //<<<<<<<< Scaled Grass >>>>>>>

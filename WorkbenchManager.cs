@@ -11,7 +11,7 @@ namespace Ravenwood.Biomes
     public static class WorkbenchManager
     {
         public const string WorkbenchPrefabName = "RWB_Alchemy_Table";
-        public const string WorkbenchDisplayName = "Ravenwood Alchemy Table";
+        public const string WorkbenchDisplayName = "Ravenwood Table";
         private const string WorkbenchDescription = "A Ravenwood alchemy table.";
         private const string WorkbenchCategory = "Crafting";
         private const string VanillaWorkbenchPrefabName = "piece_workbench";
