@@ -15,6 +15,7 @@ namespace Ravenwood.Biomes
         private const string WorkbenchDescription = "A Ravenwood alchemy table.";
         private const string WorkbenchCategory = "Crafting";
         private const string VanillaWorkbenchPrefabName = "piece_workbench";
+        private const string ArtisanTablePrefabName = "piece_artisanstation";
         private const string BowlChildName = "bowl";
         private const float WorkbenchHealth = 400f;
         private const float DiscoverRange = 4f;
@@ -33,6 +34,7 @@ namespace Ravenwood.Biomes
 
         private static bool registered;
         private static bool copiedVanillaWorkbenchCraftEffects;
+        private static bool copiedArtisanTablePieceEffects;
         private static GameObject registeredWorkbenchPrefab;
 
         public static void RegisterWorkbench(AssetBundle bundle)
@@ -63,6 +65,7 @@ namespace Ravenwood.Biomes
             PieceManager.Instance.AddPiece(new CustomPiece(prefab, true, pieceConfig));
             registered = true;
             TryCopyVanillaWorkbenchCraftEffects();
+            TryCopyArtisanTablePieceEffects();
         }
 
         private static void PrepareWorkbenchPrefab(GameObject prefab, AssetBundle bundle)
@@ -194,6 +197,39 @@ namespace Ravenwood.Biomes
             }
         }
 
+        public static void TryCopyArtisanTablePieceEffects()
+        {
+            if (copiedArtisanTablePieceEffects)
+            {
+                return;
+            }
+
+            if (ZNetScene.instance == null)
+            {
+                return;
+            }
+
+            GameObject artisanTable = ZNetScene.instance.GetPrefab(ArtisanTablePrefabName);
+            if (artisanTable == null)
+            {
+                return;
+            }
+
+            bool copied = false;
+            copied |= TryCopyPieceEffects(artisanTable, registeredWorkbenchPrefab);
+
+            GameObject sceneWorkbench = ZNetScene.instance.GetPrefab(WorkbenchPrefabName);
+            if (sceneWorkbench != null && sceneWorkbench != registeredWorkbenchPrefab)
+            {
+                copied |= TryCopyPieceEffects(artisanTable, sceneWorkbench);
+            }
+
+            if (copied)
+            {
+                copiedArtisanTablePieceEffects = true;
+            }
+        }
+
         private static bool TryCopyCraftEffects(CraftingStation vanillaStation, GameObject targetPrefab)
         {
             if (vanillaStation == null || targetPrefab == null)
@@ -211,6 +247,34 @@ namespace Ravenwood.Biomes
             copied |= CopyFieldIfExists(vanillaStation, targetStation, "m_craftItemEffects");
             copied |= CopyFieldIfExists(vanillaStation, targetStation, "m_craftItemDoneEffects");
             copied |= TryAddCraftDoneSparkleEffect(targetStation, targetPrefab);
+            return copied;
+        }
+
+        private static bool TryCopyPieceEffects(GameObject sourcePrefab, GameObject targetPrefab)
+        {
+            if (sourcePrefab == null || targetPrefab == null)
+            {
+                return false;
+            }
+
+            bool copied = false;
+
+            Piece sourcePiece = sourcePrefab.GetComponent<Piece>();
+            Piece targetPiece = targetPrefab.GetComponent<Piece>();
+            if (sourcePiece != null && targetPiece != null)
+            {
+                copied |= CopyFieldIfExists(sourcePiece, targetPiece, "m_placeEffect");
+            }
+
+            WearNTear sourceWear = sourcePrefab.GetComponent<WearNTear>();
+            WearNTear targetWear = targetPrefab.GetComponent<WearNTear>();
+            if (sourceWear != null && targetWear != null)
+            {
+                copied |= CopyFieldIfExists(sourceWear, targetWear, "m_hitEffect");
+                copied |= CopyFieldIfExists(sourceWear, targetWear, "m_destroyedEffect");
+                copied |= CopyFieldIfExists(sourceWear, targetWear, "m_switchEffect");
+            }
+
             return copied;
         }
 
@@ -538,6 +602,7 @@ namespace Ravenwood.Biomes
             private static void Postfix()
             {
                 TryCopyVanillaWorkbenchCraftEffects();
+                TryCopyArtisanTablePieceEffects();
             }
         }
 
