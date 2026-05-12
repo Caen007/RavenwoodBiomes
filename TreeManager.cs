@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
-using HarmonyLib;
 using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
@@ -25,8 +23,9 @@ namespace Ravenwood.Biomes
         private static GameObject registeredSerumPrefab;
         private static GameObject registeredGreenMushroomItemPrefab;
         private static GameObject registeredPurpleMushroomItemPrefab;
+        private static GameObject registeredGreenMushroomPickablePrefab;
+        private static GameObject registeredPurpleMushroomPickablePrefab;
         private static AssetBundle registeredBundle;
-        private static bool vanillaCultivatorMushroomsRegistered;
 
         public static void Initialize(BaseUnityPlugin plugin, AssetBundle bundle, ConfigFile config)
         {
@@ -56,6 +55,7 @@ namespace Ravenwood.Biomes
             RegisterElixirPrefab(bundle);
             RegisterSerumPrefab(bundle);
             RegisterMushroomItemPrefabs(bundle);
+            RegisterPickableMushroomPrefabs(bundle);
             WorkbenchManager.RegisterWorkbench(bundle);
 
             int preparedTreeCount = 0;
@@ -70,18 +70,14 @@ namespace Ravenwood.Biomes
 
                 if (prefab == null)
                 {
-                    if (!IsVanillaCultivatorMushroomPrefab(tree.PrefabName))
-                    {
-                        missingTreeCount++;
-                        Debug.LogWarning("Tree prefab missing from asset bundle: " + tree.PrefabName);
-                    }
-
+                    missingTreeCount++;
+                    Debug.LogWarning("Tree prefab missing from asset bundle: " + tree.PrefabName);
                     continue;
                 }
 
                 if (IsCultivatorMushroomPrefab(tree.PrefabName))
                 {
-                    PrepareCultivatorMushroomPrefab(prefab, tree, bundle);
+                    PrepareCultivatorMushroomPrefab(prefab, tree);
                 }
                 else
                 {
@@ -96,7 +92,6 @@ namespace Ravenwood.Biomes
             RegisterRavenwoodWorkbenchRecipes();
             WorkbenchCustomRecipeConfig.MarkCoreRecipesRegistered();
             WorkbenchCustomRecipeConfig.TryRegisterWorkbenchRecipes();
-            TryRegisterVanillaCultivatorMushrooms();
 
             customContentRegistered = true;
 
@@ -209,6 +204,57 @@ namespace Ravenwood.Biomes
                 TreeRegistrar.PurpleMushroomDisplayName,
                 "A strange purple Ravenwood mushroom.",
                 registeredPurpleMushroomItemPrefab);
+        }
+
+        private static void RegisterPickableMushroomPrefabs(AssetBundle bundle)
+        {
+            registeredGreenMushroomPickablePrefab = RegisterPickableMushroomPrefab(
+                bundle,
+                TreeRegistrar.GreenMushroomPrefabName,
+                TreeRegistrar.GreenMushroomPickableDisplayName,
+                registeredGreenMushroomItemPrefab,
+                registeredGreenMushroomPickablePrefab);
+
+            registeredPurpleMushroomPickablePrefab = RegisterPickableMushroomPrefab(
+                bundle,
+                TreeRegistrar.PurpleMushroomPrefabName,
+                TreeRegistrar.PurpleMushroomPickableDisplayName,
+                registeredPurpleMushroomItemPrefab,
+                registeredPurpleMushroomPickablePrefab);
+        }
+
+        private static GameObject RegisterPickableMushroomPrefab(
+            AssetBundle bundle,
+            string pickablePrefabName,
+            string pickableDisplayName,
+            GameObject itemPrefab,
+            GameObject alreadyRegistered)
+        {
+            if (alreadyRegistered != null)
+            {
+                return alreadyRegistered;
+            }
+
+            if (bundle == null || string.IsNullOrWhiteSpace(pickablePrefabName))
+            {
+                return null;
+            }
+
+            GameObject pickablePrefab = bundle.LoadAsset<GameObject>(pickablePrefabName);
+            if (pickablePrefab == null)
+            {
+                Debug.LogWarning("Pickable mushroom prefab missing from asset bundle: " + pickablePrefabName);
+                return null;
+            }
+
+            if (itemPrefab == null)
+            {
+                Debug.LogWarning("Pickable mushroom skipped because item prefab is missing: " + pickablePrefabName);
+                return null;
+            }
+
+            PreparePickableMushroomPrefab(pickablePrefab, pickablePrefabName, pickableDisplayName, itemPrefab);
+            return pickablePrefab;
         }
 
         private static GameObject RegisterMushroomItemPrefab(
@@ -370,11 +416,7 @@ namespace Ravenwood.Biomes
             recipeConfig.MinStationLevel = 1;
             recipeConfig.Requirements = requirements;
 
-            int sortWeight = WorkbenchCustomRecipeConfig.GetAlchemyRecipeSortWeight(name, item, 100);
-            WorkbenchCustomRecipeConfig.ApplyRecipeConfigSortWeight(recipeConfig, sortWeight);
-
             ItemManager.Instance.AddRecipe(new CustomRecipe(recipeConfig));
-            WorkbenchCustomRecipeConfig.ApplyKnownAlchemyRecipeSortWeights();
         }
 
         private static bool CanRegisterRecipe(string item, RequirementConfig[] requirements)
@@ -465,45 +507,17 @@ namespace Ravenwood.Biomes
                 return prefab;
             }
 
-            if (!IsVanillaCultivatorMushroomPrefab(tree.PrefabName) || ZNetScene.instance == null)
-            {
-                return null;
-            }
-
-            return ZNetScene.instance.GetPrefab(tree.PrefabName);
+            return null;
         }
 
         private static bool IsCultivatorMushroomPrefab(string prefabName)
         {
-            return IsVanillaCultivatorMushroomPrefab(prefabName) ||
-                   string.Equals(prefabName, TreeRegistrar.GreenMushroomPrefabName, StringComparison.Ordinal) ||
+            return string.Equals(prefabName, TreeRegistrar.GreenMushroomPrefabName, StringComparison.Ordinal) ||
                    string.Equals(prefabName, TreeRegistrar.PurpleMushroomPrefabName, StringComparison.Ordinal);
-        }
-
-        private static bool IsVanillaCultivatorMushroomPrefab(string prefabName)
-        {
-            return string.Equals(prefabName, "Pickable_Mushroom", StringComparison.Ordinal) ||
-                   string.Equals(prefabName, "Pickable_Mushroom_yellow", StringComparison.Ordinal) ||
-                   string.Equals(prefabName, "Pickable_Mushroom_blue", StringComparison.Ordinal);
         }
 
         private static string GetCultivatorMushroomItemPrefabName(string prefabName)
         {
-            if (string.Equals(prefabName, "Pickable_Mushroom", StringComparison.Ordinal))
-            {
-                return "Mushroom";
-            }
-
-            if (string.Equals(prefabName, "Pickable_Mushroom_yellow", StringComparison.Ordinal))
-            {
-                return "MushroomYellow";
-            }
-
-            if (string.Equals(prefabName, "Pickable_Mushroom_blue", StringComparison.Ordinal))
-            {
-                return "MushroomBlue";
-            }
-
             if (string.Equals(prefabName, TreeRegistrar.GreenMushroomPrefabName, StringComparison.Ordinal))
             {
                 return TreeRegistrar.GreenMushroomItemPrefabName;
@@ -515,78 +529,6 @@ namespace Ravenwood.Biomes
             }
 
             return string.Empty;
-        }
-
-        private static GameObject ResolveCultivatorMushroomItemPrefab(AssetBundle bundle, string pickablePrefabName)
-        {
-            string itemPrefabName = GetCultivatorMushroomItemPrefabName(pickablePrefabName);
-            if (string.IsNullOrWhiteSpace(itemPrefabName))
-            {
-                return null;
-            }
-
-            if (string.Equals(itemPrefabName, TreeRegistrar.GreenMushroomItemPrefabName, StringComparison.Ordinal) && registeredGreenMushroomItemPrefab != null)
-            {
-                return registeredGreenMushroomItemPrefab;
-            }
-
-            if (string.Equals(itemPrefabName, TreeRegistrar.PurpleMushroomItemPrefabName, StringComparison.Ordinal) && registeredPurpleMushroomItemPrefab != null)
-            {
-                return registeredPurpleMushroomItemPrefab;
-            }
-
-            if (ObjectDB.instance != null)
-            {
-                GameObject objectDbPrefab = ObjectDB.instance.GetItemPrefab(itemPrefabName);
-                if (objectDbPrefab != null)
-                {
-                    return objectDbPrefab;
-                }
-            }
-
-            if (ZNetScene.instance != null)
-            {
-                GameObject znetPrefab = ZNetScene.instance.GetPrefab(itemPrefabName);
-                if (znetPrefab != null)
-                {
-                    return znetPrefab;
-                }
-            }
-
-            return bundle != null ? bundle.LoadAsset<GameObject>(itemPrefabName) : null;
-        }
-
-        private static void EnsurePickableMushroomItemPrefab(GameObject prefab, TreeConfigFile.TreeDefinition tree, AssetBundle bundle)
-        {
-            if (prefab == null || tree == null)
-            {
-                return;
-            }
-
-            Pickable pickable = prefab.GetComponent<Pickable>();
-            if (pickable == null)
-            {
-                pickable = prefab.AddComponent<Pickable>();
-            }
-
-            GameObject itemPrefab = ResolveCultivatorMushroomItemPrefab(bundle, tree.PrefabName);
-            if (itemPrefab == null)
-            {
-                Debug.LogWarning("[RavenwoodBiomes] Pickable mushroom item prefab missing for: " + tree.PrefabName);
-                return;
-            }
-
-            FieldInfo itemPrefabField = AccessTools.Field(typeof(Pickable), "m_itemPrefab");
-            if (itemPrefabField != null)
-            {
-                itemPrefabField.SetValue(pickable, itemPrefab);
-            }
-
-            FieldInfo amountField = AccessTools.Field(typeof(Pickable), "m_amount");
-            if (amountField != null)
-            {
-                amountField.SetValue(pickable, 1);
-            }
         }
 
         private static Sprite ResolveCultivatorIcon(AssetBundle bundle, TreeConfigFile.TreeDefinition tree)
@@ -619,11 +561,20 @@ namespace Ravenwood.Biomes
             return icons != null && icons.Length > 0 ? icons[0] : null;
         }
 
-        private static void PrepareCultivatorMushroomPrefab(GameObject prefab, TreeConfigFile.TreeDefinition tree, AssetBundle bundle)
+        private static void PrepareCultivatorMushroomPrefab(GameObject prefab, TreeConfigFile.TreeDefinition tree)
         {
             if (prefab == null || tree == null)
             {
                 return;
+            }
+
+            if (string.Equals(tree.PrefabName, TreeRegistrar.GreenMushroomPrefabName, StringComparison.Ordinal))
+            {
+                PreparePickableMushroomPrefab(prefab, tree.PrefabName, TreeRegistrar.GreenMushroomPickableDisplayName, registeredGreenMushroomItemPrefab);
+            }
+            else if (string.Equals(tree.PrefabName, TreeRegistrar.PurpleMushroomPrefabName, StringComparison.Ordinal))
+            {
+                PreparePickableMushroomPrefab(prefab, tree.PrefabName, TreeRegistrar.PurpleMushroomPickableDisplayName, registeredPurpleMushroomItemPrefab);
             }
 
             ZNetView znv = prefab.GetComponent<ZNetView>();
@@ -644,53 +595,7 @@ namespace Ravenwood.Biomes
             piece.m_name = tree.DisplayName;
             piece.m_description = tree.Description;
             piece.m_groundOnly = false;
-            piece.m_canBeRemoved = false;
-
-            EnsurePickableMushroomItemPrefab(prefab, tree, bundle);
-        }
-
-        private static void TryRegisterVanillaCultivatorMushrooms()
-        {
-            if (vanillaCultivatorMushroomsRegistered || ZNetScene.instance == null)
-            {
-                return;
-            }
-
-            TreeConfigFile.BuildTreeDefinitions();
-
-            int needed = 0;
-            int registeredNow = 0;
-            IReadOnlyList<TreeConfigFile.TreeDefinition> trees = TreeConfigFile.Definitions;
-
-            for (int i = 0; i < trees.Count; i++)
-            {
-                TreeConfigFile.TreeDefinition tree = trees[i];
-                if (tree == null || !IsVanillaCultivatorMushroomPrefab(tree.PrefabName))
-                {
-                    continue;
-                }
-
-                needed++;
-
-                if (RegisteredTreePrefabs.ContainsKey(tree.PrefabName))
-                {
-                    registeredNow++;
-                    continue;
-                }
-
-                GameObject prefab = ZNetScene.instance.GetPrefab(tree.PrefabName);
-                if (prefab == null)
-                {
-                    continue;
-                }
-
-                PrepareCultivatorMushroomPrefab(prefab, tree, registeredBundle);
-                RegisterCultivatorTree(prefab, tree, registeredBundle);
-                RegisteredTreePrefabs[tree.PrefabName] = prefab;
-                registeredNow++;
-            }
-
-            vanillaCultivatorMushroomsRegistered = needed > 0 && registeredNow == needed;
+            piece.m_canBeRemoved = true;
         }
 
         private static void RegisterCultivatorTree(GameObject prefab, TreeConfigFile.TreeDefinition tree, AssetBundle bundle)
@@ -830,6 +735,53 @@ namespace Ravenwood.Biomes
             itemDrop.m_itemData = CreateSerumItemData(prefab, icon);
         }
 
+        private static void PreparePickableMushroomPrefab(GameObject prefab, string prefabName, string displayName, GameObject itemPrefab)
+        {
+            if (prefab == null || itemPrefab == null)
+            {
+                return;
+            }
+
+            prefab.name = prefabName;
+            RemoveItemDrops(prefab);
+            RemoveComponentsInChildren<Piece>(prefab);
+            RemoveComponentsInChildren<Rigidbody>(prefab);
+            RemoveComponentsInChildren<TreeRuntimeState>(prefab);
+            RemoveComponentsInChildren<TreeHoverText>(prefab);
+            RemoveComponentsInChildren<WearNTear>(prefab);
+            RemoveComponentsInChildren<Destructible>(prefab);
+
+            ZNetView znv = prefab.GetComponent<ZNetView>();
+            if (znv == null)
+            {
+                znv = prefab.AddComponent<ZNetView>();
+            }
+
+            znv.m_persistent = true;
+            znv.m_syncInitialScale = true;
+
+            Pickable pickable = prefab.GetComponent<Pickable>();
+            Pickable[] pickables = prefab.GetComponentsInChildren<Pickable>(true);
+            for (int i = 0; i < pickables.Length; i++)
+            {
+                Pickable current = pickables[i];
+                if (current != null && current != pickable)
+                {
+                    Object.DestroyImmediate(current, true);
+                }
+            }
+
+            if (pickable == null)
+            {
+                pickable = prefab.AddComponent<Pickable>();
+            }
+
+            pickable.m_overrideName = displayName;
+            pickable.m_itemPrefab = itemPrefab;
+            pickable.m_amount = 1;
+            pickable.m_minAmountScaled = 1;
+        }
+
         private static void PrepareMushroomItemPrefab(GameObject prefab, string prefabName, string displayName, string description, AssetBundle bundle)
         {
             if (prefab == null)
@@ -837,15 +789,25 @@ namespace Ravenwood.Biomes
                 return;
             }
 
+            bool keepUnityDropSetup =
+                string.Equals(prefabName, TreeRegistrar.GreenMushroomItemPrefabName, StringComparison.Ordinal) ||
+                string.Equals(prefabName, TreeRegistrar.PurpleMushroomItemPrefabName, StringComparison.Ordinal);
+
+            ItemDrop existingItemDrop = prefab.GetComponent<ItemDrop>();
+            ItemDrop.ItemData.SharedData existingShared = existingItemDrop != null && existingItemDrop.m_itemData != null
+                ? existingItemDrop.m_itemData.m_shared
+                : null;
+
             prefab.name = prefabName;
 
-            bool keepUnityDropSetup = string.Equals(prefabName, TreeRegistrar.GreenMushroomItemPrefabName, StringComparison.Ordinal);
             if (!keepUnityDropSetup)
             {
                 SetLayerRecursively(prefab, "item");
                 EnsureSolidColliders(prefab);
+                EnsureRootItemCollider(prefab);
                 EnsureSeedRigidbody(prefab);
                 RemoveSeedPiece(prefab);
+                RemoveItemDrops(prefab);
                 RemovePickables(prefab);
             }
 
@@ -865,10 +827,6 @@ namespace Ravenwood.Biomes
             {
                 itemDrop = prefab.AddComponent<ItemDrop>();
             }
-
-            ItemDrop.ItemData.SharedData existingShared = itemDrop.m_itemData != null
-                ? itemDrop.m_itemData.m_shared
-                : null;
 
             if (!keepUnityDropSetup)
             {
@@ -1017,27 +975,10 @@ namespace Ravenwood.Biomes
             shared.m_useDurability = false;
             shared.m_destroyBroken = false;
             shared.m_canBeReparied = false;
-
-            if (string.Equals(prefabName, TreeRegistrar.GreenMushroomItemPrefabName, StringComparison.Ordinal))
-            {
-                shared.m_food = 30f;
-                shared.m_foodStamina = 10f;
-                shared.m_foodEitr = 0f;
-                ClearGreenMushroomConsumeEffects(shared);
-            }
-            else if (string.Equals(prefabName, TreeRegistrar.PurpleMushroomItemPrefabName, StringComparison.Ordinal))
-            {
-                shared.m_food = 22f;
-                shared.m_foodStamina = 22f;
-                shared.m_foodEitr = 22f;
-            }
-            else
-            {
-                shared.m_food = shared.m_food > 0f ? shared.m_food : 15f;
-                shared.m_foodStamina = shared.m_foodStamina > 0f ? shared.m_foodStamina : 15f;
-                shared.m_foodEitr = Mathf.Max(0f, shared.m_foodEitr);
-            }
-
+            ResolveMushroomFoodStats(prefabName, out float food, out float stamina, out float eitr);
+            shared.m_food = food;
+            shared.m_foodStamina = stamina;
+            shared.m_foodEitr = eitr;
             shared.m_foodBurnTime = shared.m_foodBurnTime > 0f ? shared.m_foodBurnTime : 900f;
             shared.m_foodRegen = shared.m_foodRegen > 0f ? shared.m_foodRegen : 1f;
             shared.m_attackForce = Mathf.Max(0f, shared.m_attackForce);
@@ -1049,35 +990,27 @@ namespace Ravenwood.Biomes
             return itemData;
         }
 
-        private static void ClearGreenMushroomConsumeEffects(ItemDrop.ItemData.SharedData shared)
+        private static void ResolveMushroomFoodStats(string prefabName, out float food, out float stamina, out float eitr)
         {
-            if (shared == null)
+            if (string.Equals(prefabName, TreeRegistrar.GreenMushroomItemPrefabName, StringComparison.Ordinal))
             {
+                food = 30f;
+                stamina = 10f;
+                eitr = 0f;
                 return;
             }
 
-            string[] effectFieldNames =
+            if (string.Equals(prefabName, TreeRegistrar.PurpleMushroomItemPrefabName, StringComparison.Ordinal))
             {
-                "m_consumeStatusEffect",
-                "m_equipStatusEffect",
-                "m_setStatusEffect",
-                "m_attackStatusEffect"
-            };
-
-            Type sharedType = shared.GetType();
-            for (int i = 0; i < effectFieldNames.Length; i++)
-            {
-                FieldInfo effectField = sharedType.GetField(
-                    effectFieldNames[i],
-                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-
-                if (effectField == null || !typeof(ScriptableObject).IsAssignableFrom(effectField.FieldType))
-                {
-                    continue;
-                }
-
-                effectField.SetValue(shared, null);
+                food = 22f;
+                stamina = 22f;
+                eitr = 22f;
+                return;
             }
+
+            food = 15f;
+            stamina = 15f;
+            eitr = 0f;
         }
 
         private static Sprite LoadIconSprite(AssetBundle bundle, string assetName)
@@ -1475,6 +1408,40 @@ namespace Ravenwood.Biomes
             }
         }
 
+        private static void EnsureRootItemCollider(GameObject prefab)
+        {
+            if (prefab == null)
+            {
+                return;
+            }
+
+            BoxCollider box = prefab.GetComponent<BoxCollider>();
+            if (box == null)
+            {
+                box = prefab.AddComponent<BoxCollider>();
+            }
+
+            Renderer[] renderers = prefab.GetComponentsInChildren<Renderer>(true);
+            if (renderers.Length > 0)
+            {
+                Bounds bounds = renderers[0].bounds;
+                for (int i = 1; i < renderers.Length; i++)
+                {
+                    bounds.Encapsulate(renderers[i].bounds);
+                }
+
+                box.center = prefab.transform.InverseTransformPoint(bounds.center);
+                box.size = bounds.size;
+            }
+            else if (box.size == Vector3.zero)
+            {
+                box.size = new Vector3(0.4f, 0.4f, 0.4f);
+            }
+
+            box.enabled = true;
+            box.isTrigger = false;
+        }
+
         private static void EnsureSolidColliders(GameObject prefab)
         {
             if (prefab == null)
@@ -1617,14 +1584,5 @@ namespace Ravenwood.Biomes
             return cleaned;
         }
 
-
-        [HarmonyPatch(typeof(ZNetScene), "Awake")]
-        private static class ZNetScene_Awake_Patch
-        {
-            private static void Postfix()
-            {
-                TryRegisterVanillaCultivatorMushrooms();
-            }
-        }
     }
 }
