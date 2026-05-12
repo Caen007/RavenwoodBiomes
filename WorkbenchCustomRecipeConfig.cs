@@ -100,7 +100,7 @@ namespace Ravenwood.Biomes
                 "RP_PotionMinorDefense",
                 1,
                 Req(3, "Essence_Poison"),
-                Req(3, "RWB_Green_Mushroom", "GreenMushroom"),
+                Req(3, "RWB_Green_Mushroom"),
                 Req(3, "Raspberry"),
                 Req(3, "Coal")),
 
@@ -137,7 +137,7 @@ namespace Ravenwood.Biomes
                 "RP_PotionMediumDefense",
                 1,
                 Req(5, "Essence_Poison"),
-                Req(5, "RWB_Green_Mushroom", "GreenMushroom"),
+                Req(5, "RWB_Green_Mushroom"),
                 Req(5, "Blueberries"),
                 Req(5, "Guck")),
 
@@ -174,7 +174,7 @@ namespace Ravenwood.Biomes
                 "RP_PotionMajorDefense",
                 1,
                 Req(8, "Essence_Poison"),
-                Req(8, "RWB_Green_Mushroom", "GreenMushroom"),
+                Req(8, "RWB_Green_Mushroom"),
                 Req(8, "Cloudberry", "Cloudberries"),
                 Req(8, "Tar")),
 
@@ -211,7 +211,7 @@ namespace Ravenwood.Biomes
                 "RP_PotionMythicDefense",
                 1,
                 Req(10, "Essence_Poison"),
-                Req(10, "RWB_Green_Mushroom", "GreenMushroom"),
+                Req(10, "RWB_Green_Mushroom"),
                 Req(10, "Vineberry", "Vineberries"),
                 Req(10, "Sap")),
 
@@ -580,6 +580,39 @@ namespace Ravenwood.Biomes
             return string.Compare(NormalizeRecipeName(left != null ? left.name : string.Empty), NormalizeRecipeName(right != null ? right.name : string.Empty), StringComparison.Ordinal);
         }
 
+        private static void SortAvailableAlchemyRecipes(List<Recipe> available)
+        {
+            if (available == null || available.Count <= 1)
+            {
+                return;
+            }
+
+            List<Recipe> alchemyRecipes = new List<Recipe>();
+            List<int> alchemyIndexes = new List<int>();
+
+            for (int i = 0; i < available.Count; i++)
+            {
+                Recipe recipe = available[i];
+                if (IsKnownAlchemyRecipe(recipe))
+                {
+                    alchemyRecipes.Add(recipe);
+                    alchemyIndexes.Add(i);
+                }
+            }
+
+            if (alchemyRecipes.Count <= 1)
+            {
+                return;
+            }
+
+            alchemyRecipes.Sort(CompareAlchemyRecipes);
+
+            for (int i = 0; i < alchemyIndexes.Count; i++)
+            {
+                available[alchemyIndexes[i]] = alchemyRecipes[i];
+            }
+        }
+
         private static bool IsKnownAlchemyRecipe(Recipe recipe)
         {
             int sortWeight;
@@ -838,11 +871,25 @@ namespace Ravenwood.Biomes
             }
         }
 
+        private static bool IsKnownRavenwoodItemPrefab(string prefabName)
+        {
+            return string.Equals(prefabName, TreeRegistrar.RavenSeedPrefabName, StringComparison.Ordinal) ||
+                   string.Equals(prefabName, TreeRegistrar.RavenSerumPrefabName, StringComparison.Ordinal) ||
+                   string.Equals(prefabName, TreeRegistrar.RavenElixirPrefabName, StringComparison.Ordinal) ||
+                   string.Equals(prefabName, TreeRegistrar.GreenMushroomItemPrefabName, StringComparison.Ordinal) ||
+                   string.Equals(prefabName, TreeRegistrar.PurpleMushroomItemPrefabName, StringComparison.Ordinal);
+        }
+
         private static bool ItemPrefabExists(string prefabName)
         {
             if (string.IsNullOrWhiteSpace(prefabName))
             {
                 return false;
+            }
+
+            if (coreRecipesRegistered && IsKnownRavenwoodItemPrefab(prefabName))
+            {
+                return true;
             }
 
             ObjectDB objectDb = ObjectDB.instance;
@@ -1021,6 +1068,15 @@ namespace Ravenwood.Biomes
             private static void Postfix()
             {
                 ApplyKnownAlchemyRecipeSortWeights();
+            }
+        }
+
+        [HarmonyPatch(typeof(Player), "GetAvailableRecipes")]
+        private static class PlayerGetAvailableRecipesRecipeSortPatch
+        {
+            private static void Postfix(ref List<Recipe> available)
+            {
+                SortAvailableAlchemyRecipes(available);
             }
         }
 
