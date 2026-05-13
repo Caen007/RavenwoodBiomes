@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using HarmonyLib;
 using Jotunn.Entities;
 using Jotunn.Managers;
 using UnityEngine;
@@ -752,6 +753,91 @@ namespace Ravenwood.Biomes
                 {
                     Object.DestroyImmediate(pickables[i], true);
                 }
+            }
+        }
+
+
+
+        private static void PlayPickFeedback(GameObject pickedObject)
+        {
+            if (pickedObject == null)
+            {
+                return;
+            }
+
+            string prefabName = CleanPrefabName(pickedObject.name);
+            if (!IsCultivatorMushroomPrefab(prefabName))
+            {
+                return;
+            }
+
+            SpawnFirstAvailable(
+                pickedObject.transform.position,
+                pickedObject.transform.rotation,
+                "sfx_item_pickup",
+                "sfx_gui_craftitem",
+                "sfx_pickable_pick");
+        }
+
+
+
+        private static void SpawnFirstAvailable(Vector3 position, Quaternion rotation, params string[] prefabNames)
+        {
+            if (prefabNames == null || prefabNames.Length == 0 || ZNetScene.instance == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < prefabNames.Length; i++)
+            {
+                string prefabName = prefabNames[i];
+                if (string.IsNullOrWhiteSpace(prefabName))
+                {
+                    continue;
+                }
+
+                GameObject effectPrefab = ZNetScene.instance.GetPrefab(prefabName);
+                if (effectPrefab == null)
+                {
+                    continue;
+                }
+
+                Object.Instantiate(effectPrefab, position, rotation);
+                return;
+            }
+        }
+
+
+
+        private static string CleanPrefabName(string prefabName)
+        {
+            if (string.IsNullOrWhiteSpace(prefabName))
+            {
+                return string.Empty;
+            }
+
+            string cleaned = prefabName.Trim();
+            if (cleaned.EndsWith("(Clone)", StringComparison.OrdinalIgnoreCase))
+            {
+                cleaned = cleaned.Substring(0, cleaned.Length - "(Clone)".Length).Trim();
+            }
+
+            return cleaned;
+        }
+
+
+
+        [HarmonyPatch(typeof(Pickable), "Interact")]
+        private static class PickableInteractPatch
+        {
+            private static void Postfix(Pickable __instance, bool __result)
+            {
+                if (!__result || __instance == null || __instance.gameObject == null)
+                {
+                    return;
+                }
+
+                PlayPickFeedback(__instance.gameObject);
             }
         }
 

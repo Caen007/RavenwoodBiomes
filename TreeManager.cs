@@ -16,6 +16,7 @@ namespace Ravenwood.Biomes
         private static bool customContentRegistered;
 
         private const string EternalSupportPrefabName = "RWB_Eternal_ScaledTree11";
+        private const string CultivatorPrefabSuffix = "_Cultivator";
 
         private static readonly Dictionary<string, GameObject> RegisteredTreePrefabs = new Dictionary<string, GameObject>();
         private static GameObject registeredSeedPrefab;
@@ -74,14 +75,30 @@ namespace Ravenwood.Biomes
                 if (PickableMushroomManager.IsCultivatorMushroomPrefab(tree.PrefabName))
                 {
                     PickableMushroomManager.PrepareCultivatorMushroomPrefab(prefab, tree);
-                }
-                else
-                {
-                    PrepareTreePrefab(prefab, tree);
+                    RegisterCultivatorTree(prefab, tree, bundle);
+                    RegisteredTreePrefabs[tree.PrefabName] = prefab;
+                    preparedTreeCount++;
+                    continue;
                 }
 
-                RegisterCultivatorTree(prefab, tree, bundle);
+                PrepareTreePrefab(prefab, tree);
+                GameObject cultivatorPrefab = CreateCultivatorTreeClone(prefab, tree);
+                if (cultivatorPrefab == null)
+                {
+                    RegisterWorldTreePrefab(prefab);
+                    RegisteredTreePrefabs[tree.PrefabName] = prefab;
+                    Debug.LogWarning("Cultivator tree clone failed: " + tree.PrefabName);
+                    preparedTreeCount++;
+                    continue;
+                }
+
+                if (!ReferenceEquals(cultivatorPrefab, prefab))
+                {
+                    RegisterWorldTreePrefab(prefab);
+                }
+
                 RegisteredTreePrefabs[tree.PrefabName] = prefab;
+                RegisterCultivatorTree(cultivatorPrefab, tree, bundle);
                 preparedTreeCount++;
             }
 
@@ -370,6 +387,75 @@ namespace Ravenwood.Biomes
             }
 
             return null;
+        }
+
+        private static void RegisterWorldTreePrefab(GameObject prefab)
+        {
+            if (prefab == null)
+            {
+                return;
+            }
+
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(prefab, true));
+        }
+
+        private static GameObject CreateCultivatorTreeClone(GameObject worldPrefab, TreeConfigFile.TreeDefinition tree)
+        {
+            if (worldPrefab == null || tree == null)
+            {
+                return null;
+            }
+
+            if (HasStaticPhysics(worldPrefab))
+            {
+                return worldPrefab;
+            }
+
+            GameObject cultivatorPrefab = Object.Instantiate(worldPrefab);
+            if (cultivatorPrefab == null)
+            {
+                return null;
+            }
+
+            cultivatorPrefab.name = GetCultivatorPrefabName(tree.PrefabName);
+            PrepareTreePrefab(cultivatorPrefab, tree);
+            cultivatorPrefab.name = GetCultivatorPrefabName(tree.PrefabName);
+            EnsureCultivatorPieceRules(cultivatorPrefab, tree);
+            return cultivatorPrefab;
+        }
+
+        private static bool HasStaticPhysics(GameObject prefab)
+        {
+            return prefab != null && prefab.GetComponentInChildren<StaticPhysics>(true) != null;
+        }
+
+        private static string GetCultivatorPrefabName(string prefabName)
+        {
+            if (string.IsNullOrWhiteSpace(prefabName))
+            {
+                return string.Empty;
+            }
+
+            return prefabName + CultivatorPrefabSuffix;
+        }
+
+        private static void EnsureCultivatorPieceRules(GameObject prefab, TreeConfigFile.TreeDefinition tree)
+        {
+            if (prefab == null || tree == null)
+            {
+                return;
+            }
+
+            Piece piece = prefab.GetComponent<Piece>();
+            if (piece == null)
+            {
+                piece = prefab.AddComponent<Piece>();
+            }
+
+            piece.m_name = tree.DisplayName;
+            piece.m_description = tree.Description;
+            piece.m_groundOnly = false;
+            piece.m_canBeRemoved = true;
         }
         private static void RegisterCultivatorTree(GameObject prefab, TreeConfigFile.TreeDefinition tree, AssetBundle bundle)
         {
@@ -1186,6 +1272,11 @@ namespace Ravenwood.Biomes
             if (cleaned.EndsWith("(Clone)", StringComparison.OrdinalIgnoreCase))
             {
                 cleaned = cleaned.Substring(0, cleaned.Length - "(Clone)".Length).Trim();
+            }
+
+            if (cleaned.EndsWith(CultivatorPrefabSuffix, StringComparison.Ordinal))
+            {
+                cleaned = cleaned.Substring(0, cleaned.Length - CultivatorPrefabSuffix.Length).Trim();
             }
 
             return cleaned;

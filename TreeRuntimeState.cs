@@ -11,6 +11,7 @@ namespace Ravenwood.Biomes
     {
         private const string PlayerPlacedZdoKey = "rvb_playerplaced";
         private const string CultivatorPrefabName = "Cultivator";
+        private const string CultivatorPrefabSuffix = "_Cultivator";
         private const float RemoveRayDistance = 50f;
 
         private static readonly FieldInfo RightItemField = AccessTools.Field(typeof(Humanoid), "m_rightItem");
@@ -724,6 +725,11 @@ namespace Ravenwood.Biomes
             if (cleaned.EndsWith("(Clone)", StringComparison.OrdinalIgnoreCase))
             {
                 cleaned = cleaned.Substring(0, cleaned.Length - "(Clone)".Length).Trim();
+            }
+
+            if (cleaned.EndsWith(CultivatorPrefabSuffix, StringComparison.Ordinal))
+            {
+                cleaned = cleaned.Substring(0, cleaned.Length - CultivatorPrefabSuffix.Length).Trim();
             }
 
             return cleaned;
