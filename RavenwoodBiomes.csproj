@@ -24,6 +24,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="IgnoreAccessModifiers.cs" />
+    <Compile Include="PickableMushroomManager.cs" />
     <Compile Include="RavenwoodBiomes.cs" />
     <Compile Include="TreeConfigFile.cs" />
     <Compile Include="TreeDropEntry.cs" />
