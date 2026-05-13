@@ -231,6 +231,12 @@ namespace Ravenwood.Biomes
                 return;
             }
 
+            if (!IsPlayerPlaced() && GetPieceCreator(piece) == 0L)
+            {
+                piece.m_canBeRemoved = false;
+                return;
+            }
+
             piece.m_groundOnly = false;
             piece.m_canBeRemoved = true;
         }

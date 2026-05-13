@@ -789,27 +789,19 @@ namespace Ravenwood.Biomes
                 return;
             }
 
-            bool keepUnityDropSetup =
-                string.Equals(prefabName, TreeRegistrar.GreenMushroomItemPrefabName, StringComparison.Ordinal) ||
-                string.Equals(prefabName, TreeRegistrar.PurpleMushroomItemPrefabName, StringComparison.Ordinal);
-
             ItemDrop existingItemDrop = prefab.GetComponent<ItemDrop>();
             ItemDrop.ItemData.SharedData existingShared = existingItemDrop != null && existingItemDrop.m_itemData != null
                 ? existingItemDrop.m_itemData.m_shared
                 : null;
 
             prefab.name = prefabName;
-
-            if (!keepUnityDropSetup)
-            {
-                SetLayerRecursively(prefab, "item");
-                EnsureSolidColliders(prefab);
-                EnsureRootItemCollider(prefab);
-                EnsureSeedRigidbody(prefab);
-                RemoveSeedPiece(prefab);
-                RemoveItemDrops(prefab);
-                RemovePickables(prefab);
-            }
+            SetLayerRecursively(prefab, "item");
+            EnsureSolidColliders(prefab);
+            EnsureRootItemCollider(prefab);
+            EnsureSeedRigidbody(prefab);
+            RemoveSeedPiece(prefab);
+            RemoveItemDrops(prefab);
+            RemovePickables(prefab);
 
             ZNetView znv = prefab.GetComponent<ZNetView>();
             if (znv == null)
@@ -822,18 +814,9 @@ namespace Ravenwood.Biomes
 
             Sprite icon = LoadIconSprite(bundle, prefabName);
 
-            ItemDrop itemDrop = prefab.GetComponent<ItemDrop>();
-            if (itemDrop == null)
-            {
-                itemDrop = prefab.AddComponent<ItemDrop>();
-            }
-
-            if (!keepUnityDropSetup)
-            {
-                itemDrop.m_autoPickup = true;
-                itemDrop.m_autoDestroy = true;
-            }
-
+            ItemDrop itemDrop = prefab.AddComponent<ItemDrop>();
+            itemDrop.m_autoPickup = true;
+            itemDrop.m_autoDestroy = true;
             itemDrop.m_itemData = CreateMushroomItemData(prefab, prefabName, displayName, description, icon, existingShared);
         }
 
