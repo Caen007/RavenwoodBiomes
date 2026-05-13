@@ -781,7 +781,46 @@ namespace Ravenwood.Biomes
             pickable.m_itemPrefab = itemPrefab;
             pickable.m_amount = 1;
             pickable.m_minAmountScaled = 1;
+
+            ApplyPickableMushroomVisualState(prefab, pickable);
             ApplyVanillaMushroomRespawnProfile(pickable);
+        }
+
+        private static void ApplyPickableMushroomVisualState(GameObject prefab, Pickable pickable)
+        {
+            if (prefab == null || pickable == null)
+            {
+                return;
+            }
+
+            Transform visual = prefab.transform.Find("visual");
+            if (visual != null)
+            {
+                pickable.m_hideWhenPicked = visual.gameObject;
+            }
+            else if (pickable.m_hideWhenPicked == null)
+            {
+                Debug.LogWarning("[RavenwoodBiomes] Pickable mushroom is missing child 'visual': " + prefab.name);
+            }
+
+            Transform bulb = prefab.transform.Find("pickable_bulb");
+            if (bulb == null)
+            {
+                bulb = prefab.transform.Find("picked_bulb");
+            }
+
+            if (bulb == null)
+            {
+                Debug.LogWarning("[RavenwoodBiomes] Pickable mushroom is missing child 'pickable_bulb': " + prefab.name);
+                return;
+            }
+
+            if (visual != null && bulb.IsChildOf(visual))
+            {
+                Debug.LogWarning("[RavenwoodBiomes] pickable_bulb must be a sibling of 'visual', not inside it: " + prefab.name);
+            }
+
+            bulb.gameObject.SetActive(true);
         }
 
         private static void ApplyVanillaMushroomRespawnProfile(Pickable pickable)
@@ -793,8 +832,11 @@ namespace Ravenwood.Biomes
 
             const float vanillaMushroomRespawnMinutes = 240f;
             SetPickableFloatField(pickable, "m_respawnTimeMinutes", vanillaMushroomRespawnMinutes);
-            SetPickableFloatField(pickable, "m_respawnTimeInitMin", vanillaMushroomRespawnMinutes);
-            SetPickableFloatField(pickable, "m_respawnTimeInitMax", vanillaMushroomRespawnMinutes);
+            SetPickableFloatField(pickable, "m_respawnTimeInitMin", 0f);
+            SetPickableFloatField(pickable, "m_respawnTimeInitMax", 0f);
+            SetPickableBoolField(pickable, "m_defaultPicked", false);
+            SetPickableBoolField(pickable, "m_defaultEnabled", true);
+            SetPickableBoolField(pickable, "m_harvestable", true);
         }
 
         private static void SetPickableFloatField(Pickable pickable, string fieldName, float value)
@@ -806,6 +848,22 @@ namespace Ravenwood.Biomes
 
             FieldInfo field = typeof(Pickable).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             if (field == null || field.FieldType != typeof(float))
+            {
+                return;
+            }
+
+            field.SetValue(pickable, value);
+        }
+
+        private static void SetPickableBoolField(Pickable pickable, string fieldName, bool value)
+        {
+            if (pickable == null || string.IsNullOrWhiteSpace(fieldName))
+            {
+                return;
+            }
+
+            FieldInfo field = typeof(Pickable).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (field == null || field.FieldType != typeof(bool))
             {
                 return;
             }
