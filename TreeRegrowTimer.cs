@@ -489,7 +489,8 @@ namespace Ravenwood.Biomes
 
         private bool IsRespawnEnabledForPrefab(string prefabName)
         {
-            return false;
+            return string.Equals(prefabName, TreeRegistrar.GreenMushroomPrefabName, StringComparison.Ordinal) ||
+                   string.Equals(prefabName, TreeRegistrar.PurpleMushroomPrefabName, StringComparison.Ordinal);
         }
 
         private float ResolveConfiguredRespawnMinutes(ZDO zdo)

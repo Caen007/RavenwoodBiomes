@@ -8,7 +8,9 @@ namespace Ravenwood.Biomes
     public static class TreeConfigFile
     {
         private const float DefaultFallbackRespawnMinutes = 1500f;
+        private const float DefaultPickableMushroomRespawnMinutes = 240f;
         private static readonly List<TreeDefinition> TreeDefinitions = new List<TreeDefinition>();
+        private static ConfigEntry<bool> EnableRavenwoodElixirRecipe;
 
         public sealed class TreeDefinition
         {
@@ -56,6 +58,7 @@ namespace Ravenwood.Biomes
 
             BuildTreeDefinitions();
             BindTreeConfigs(configFile);
+            BindElixirConfig(configFile);
         }
 
         public static void BuildTreeDefinitions()
@@ -117,6 +120,19 @@ namespace Ravenwood.Biomes
             return clone;
         }
 
+        private static void BindElixirConfig(ConfigFile config)
+        {
+            EnableRavenwoodElixirRecipe = config.Bind(
+                "Ravenwood Elixir",
+                "EnableElixirRecipe",
+                true,
+                "Enable or disable the Ravenwood Elixir recipe at the cauldron. Enable this to show the elixir recipe and allow normal crafting of Eternal trees.");
+        }
+
+        public static bool IsRavenwoodElixirRecipeEnabled()
+        {
+            return EnableRavenwoodElixirRecipe != null && EnableRavenwoodElixirRecipe.Value;
+        }
 
         private static void BindTreeConfigs(ConfigFile config)
         {
@@ -134,6 +150,9 @@ namespace Ravenwood.Biomes
                 tree.SeedDropMin = config.Bind(section, "SeedDropMin", tree.DefaultSeedDropMin, "Minimum Raven Seed drop amount for " + tree.PrefabName + ".");
                 tree.SeedDropMax = config.Bind(section, "SeedDropMax", tree.DefaultSeedDropMax, "Maximum Raven Seed drop amount for " + tree.PrefabName + ".");
                 tree.SeedDropChance = config.Bind(section, "SeedDropChance", tree.DefaultSeedDropChance, "Chance from 0.0 to 1.0 for " + tree.PrefabName + " to drop Raven Seed.");
+
+                tree.EnableRespawn = config.Bind(section, "EnableRespawn", tree.DefaultEnableRespawn, "Enable or disable cultivator regrow for " + tree.PrefabName + ".");
+                tree.RespawnMinutes = config.Bind(section, "RespawnMinutes", tree.DefaultRespawnMinutes, "Regrow time in real-time minutes for cultivator-placed " + tree.PrefabName + ".");
             }
         }
 
@@ -145,27 +164,27 @@ namespace Ravenwood.Biomes
                 return entries;
             }
 
-            bool enableDrops = tree.DefaultEnableDrops;
+            bool enableDrops = tree.EnableDrops != null ? tree.EnableDrops.Value : tree.DefaultEnableDrops;
             if (enableDrops)
             {
-                int min = tree.DefaultDropMin;
-                int max = tree.DefaultDropMax;
+                int min = tree.DropMin != null ? tree.DropMin.Value : tree.DefaultDropMin;
+                int max = tree.DropMax != null ? tree.DropMax.Value : tree.DefaultDropMax;
                 min = Mathf.Max(0, min);
                 max = Mathf.Max(min, max);
 
-                string itemName = tree.DefaultDropItem;
+                string itemName = tree.DropItem != null ? tree.DropItem.Value : tree.DefaultDropItem;
                 if (!string.IsNullOrWhiteSpace(itemName))
                 {
                     entries.Add(new TreeDropEntry(itemName, min, max, 1f));
                 }
             }
 
-            bool enableSeedDrops = tree.DefaultEnableSeedDrops;
+            bool enableSeedDrops = tree.EnableSeedDrops != null ? tree.EnableSeedDrops.Value : tree.DefaultEnableSeedDrops;
             if (enableSeedDrops && !string.IsNullOrWhiteSpace(tree.SeedPrefabName))
             {
-                int seedMin = tree.DefaultSeedDropMin;
-                int seedMax = tree.DefaultSeedDropMax;
-                float chance = tree.DefaultSeedDropChance;
+                int seedMin = tree.SeedDropMin != null ? tree.SeedDropMin.Value : tree.DefaultSeedDropMin;
+                int seedMax = tree.SeedDropMax != null ? tree.SeedDropMax.Value : tree.DefaultSeedDropMax;
+                float chance = tree.SeedDropChance != null ? tree.SeedDropChance.Value : tree.DefaultSeedDropChance;
 
                 seedMin = Mathf.Max(0, seedMin);
                 seedMax = Mathf.Max(seedMin, seedMax);
@@ -192,6 +211,12 @@ namespace Ravenwood.Biomes
             }
 
             return null;
+        }
+
+        private static bool IsRavenwoodPickableMushroomPrefab(string prefabName)
+        {
+            return string.Equals(prefabName, TreeRegistrar.GreenMushroomPrefabName, StringComparison.Ordinal) ||
+                   string.Equals(prefabName, TreeRegistrar.PurpleMushroomPrefabName, StringComparison.Ordinal);
         }
 
         public static string GetRegrowCarrierPrefab(string prefabName)
@@ -227,12 +252,39 @@ namespace Ravenwood.Biomes
 
         public static bool GetRespawnEnabled(string prefabName, bool fallback = true)
         {
-            return false;
+            BuildTreeDefinitions();
+
+            if (IsRavenwoodPickableMushroomPrefab(prefabName))
+            {
+                return true;
+            }
+
+            TreeDefinition tree = FindTreeDefinition(prefabName);
+            if (tree == null)
+            {
+                return fallback;
+            }
+
+            return tree.EnableRespawn != null ? tree.EnableRespawn.Value : tree.DefaultEnableRespawn;
         }
 
         public static float GetRespawnMinutes(string prefabName, float fallback = DefaultFallbackRespawnMinutes)
         {
-            return 0f;
+            BuildTreeDefinitions();
+
+            TreeDefinition tree = FindTreeDefinition(prefabName);
+            if (tree == null)
+            {
+                return Mathf.Max(0f, fallback);
+            }
+
+            float minutes = tree.RespawnMinutes != null ? tree.RespawnMinutes.Value : tree.DefaultRespawnMinutes;
+            if (IsRavenwoodPickableMushroomPrefab(prefabName) && minutes <= 0f)
+            {
+                minutes = DefaultPickableMushroomRespawnMinutes;
+            }
+
+            return Mathf.Max(0f, minutes);
         }
 
         public static string GetDisplayName(string prefabName, string fallback = null)

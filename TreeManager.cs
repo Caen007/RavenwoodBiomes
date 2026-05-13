@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using Jotunn.Configs;
@@ -780,6 +781,36 @@ namespace Ravenwood.Biomes
             pickable.m_itemPrefab = itemPrefab;
             pickable.m_amount = 1;
             pickable.m_minAmountScaled = 1;
+            ApplyVanillaMushroomRespawnProfile(pickable);
+        }
+
+        private static void ApplyVanillaMushroomRespawnProfile(Pickable pickable)
+        {
+            if (pickable == null)
+            {
+                return;
+            }
+
+            const float vanillaMushroomRespawnMinutes = 240f;
+            SetPickableFloatField(pickable, "m_respawnTimeMinutes", vanillaMushroomRespawnMinutes);
+            SetPickableFloatField(pickable, "m_respawnTimeInitMin", vanillaMushroomRespawnMinutes);
+            SetPickableFloatField(pickable, "m_respawnTimeInitMax", vanillaMushroomRespawnMinutes);
+        }
+
+        private static void SetPickableFloatField(Pickable pickable, string fieldName, float value)
+        {
+            if (pickable == null || string.IsNullOrWhiteSpace(fieldName))
+            {
+                return;
+            }
+
+            FieldInfo field = typeof(Pickable).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (field == null || field.FieldType != typeof(float))
+            {
+                return;
+            }
+
+            field.SetValue(pickable, value);
         }
 
         private static void PrepareMushroomItemPrefab(GameObject prefab, string prefabName, string displayName, string description, AssetBundle bundle)

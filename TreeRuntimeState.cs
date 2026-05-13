@@ -16,10 +16,6 @@ namespace Ravenwood.Biomes
         private static readonly FieldInfo RightItemField = AccessTools.Field(typeof(Humanoid), "m_rightItem");
         private static readonly MethodInfo GetRightItemMethod = AccessTools.Method(typeof(Humanoid), "GetRightItem");
         private static readonly MethodInfo PieceGetCreatorMethod = AccessTools.Method(typeof(Piece), "GetCreator");
-        private static readonly FieldInfo PickableAmountField = AccessTools.Field(typeof(Pickable), "m_amount");
-        private static readonly MethodInfo RaiseSkillMethod = AccessTools.Method(typeof(Character), "RaiseSkill", new[] { typeof(Skills.SkillType), typeof(float) }) ??
-            AccessTools.Method(typeof(Player), "RaiseSkill", new[] { typeof(Skills.SkillType), typeof(float) });
-        private static readonly object FarmingSkillType = ResolveFarmingSkillType();
         private static readonly int RemoveRayMask = LayerMask.GetMask("piece", "piece_nonsolid", "item", "Default_small", "Default", "static_solid");
         private static Piece cachedValidatedRemovePiece;
 
@@ -475,205 +471,10 @@ namespace Ravenwood.Biomes
             }
         }
 
-        private static object ResolveFarmingSkillType()
+        private static bool IsRavenwoodPickableMushroomName(string prefabName)
         {
-            try
-            {
-                return Enum.Parse(typeof(Skills.SkillType), "Farming");
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        private static bool IsCultivatorPickableMushroomName(string prefabName)
-        {
-            return string.Equals(prefabName, "Pickable_Mushroom", StringComparison.Ordinal) ||
-                   string.Equals(prefabName, "Pickable_Mushroom_yellow", StringComparison.Ordinal) ||
-                   string.Equals(prefabName, "Pickable_Mushroom_blue", StringComparison.Ordinal) ||
-                   string.Equals(prefabName, TreeRegistrar.GreenMushroomPrefabName, StringComparison.Ordinal) ||
+            return string.Equals(prefabName, TreeRegistrar.GreenMushroomPrefabName, StringComparison.Ordinal) ||
                    string.Equals(prefabName, TreeRegistrar.PurpleMushroomPrefabName, StringComparison.Ordinal);
-        }
-
-        private static string GetCultivatorPickableMushroomItemPrefabName(string prefabName)
-        {
-            if (string.Equals(prefabName, "Pickable_Mushroom", StringComparison.Ordinal))
-            {
-                return "Mushroom";
-            }
-
-            if (string.Equals(prefabName, "Pickable_Mushroom_yellow", StringComparison.Ordinal))
-            {
-                return "MushroomYellow";
-            }
-
-            if (string.Equals(prefabName, "Pickable_Mushroom_blue", StringComparison.Ordinal))
-            {
-                return "MushroomBlue";
-            }
-
-            if (string.Equals(prefabName, TreeRegistrar.GreenMushroomPrefabName, StringComparison.Ordinal))
-            {
-                return TreeRegistrar.GreenMushroomItemPrefabName;
-            }
-
-            if (string.Equals(prefabName, TreeRegistrar.PurpleMushroomPrefabName, StringComparison.Ordinal))
-            {
-                return TreeRegistrar.PurpleMushroomItemPrefabName;
-            }
-
-            return string.Empty;
-        }
-
-        private static bool IsPlayerPlacedPickableMushroom(Pickable pickable)
-        {
-            if (pickable == null)
-            {
-                return false;
-            }
-
-            string prefabName = CleanPrefabName(pickable.gameObject.name);
-            if (!IsCultivatorPickableMushroomName(prefabName))
-            {
-                return false;
-            }
-
-            Piece pickablePiece = pickable.GetComponent<Piece>();
-            if (pickablePiece == null)
-            {
-                return false;
-            }
-
-            long creator = GetPieceCreator(pickablePiece);
-            if (creator != 0L)
-            {
-                return true;
-            }
-
-            TreeRuntimeState runtime = pickable.GetComponent<TreeRuntimeState>();
-            return runtime != null && runtime.IsPlayerPlaced();
-        }
-
-        private static int GetPickableAmount(Pickable pickable)
-        {
-            if (pickable == null || PickableAmountField == null)
-            {
-                return 1;
-            }
-
-            try
-            {
-                object value = PickableAmountField.GetValue(pickable);
-                if (value is int amount)
-                {
-                    return Mathf.Max(1, amount);
-                }
-            }
-            catch
-            {
-            }
-
-            return 1;
-        }
-
-        private static GameObject ResolveItemPrefab(string itemPrefabName)
-        {
-            if (string.IsNullOrWhiteSpace(itemPrefabName))
-            {
-                return null;
-            }
-
-            if (ObjectDB.instance != null)
-            {
-                GameObject objectDbPrefab = ObjectDB.instance.GetItemPrefab(itemPrefabName);
-                if (objectDbPrefab != null)
-                {
-                    return objectDbPrefab;
-                }
-            }
-
-            if (ZNetScene.instance != null)
-            {
-                GameObject znetPrefab = ZNetScene.instance.GetPrefab(itemPrefabName);
-                if (znetPrefab != null)
-                {
-                    return znetPrefab;
-                }
-            }
-
-            return null;
-        }
-
-        private static bool TryAddPickedMushroomToInventory(Humanoid character, Pickable pickable)
-        {
-            if (character == null || pickable == null)
-            {
-                return false;
-            }
-
-            Inventory inventory = character.GetInventory();
-            if (inventory == null)
-            {
-                return false;
-            }
-
-            string prefabName = CleanPrefabName(pickable.gameObject.name);
-            string itemPrefabName = GetCultivatorPickableMushroomItemPrefabName(prefabName);
-            GameObject itemPrefab = ResolveItemPrefab(itemPrefabName);
-            ItemDrop itemDrop = itemPrefab != null ? itemPrefab.GetComponent<ItemDrop>() : null;
-
-            if (itemDrop == null || itemDrop.m_itemData == null)
-            {
-                Debug.LogWarning("[RavenwoodBiomes] Pickable mushroom inventory item is missing ItemDrop data: " + itemPrefabName);
-                return false;
-            }
-
-            ItemDrop.ItemData itemData = itemDrop.m_itemData.Clone();
-            itemData.m_dropPrefab = itemPrefab;
-            itemData.m_stack = GetPickableAmount(pickable);
-
-            bool added = inventory.AddItem(itemData);
-            if (!added)
-            {
-                Player player = character as Player;
-                if (player != null)
-                {
-                    player.Message(MessageHud.MessageType.Center, "$msg_noroom");
-                }
-            }
-
-            return added;
-        }
-
-        private static void PlayPickedMushroomFeedback(Pickable pickable)
-        {
-            if (pickable == null || pickable.gameObject == null)
-            {
-                return;
-            }
-
-            TreeFeedbackEffects.PlayPick(
-                CleanPrefabName(pickable.gameObject.name),
-                pickable.transform.position,
-                pickable.transform.rotation);
-        }
-
-        private static void RaisePickedMushroomFarmingSkill(Humanoid character)
-        {
-            Player player = character as Player;
-            if (player == null || RaiseSkillMethod == null || FarmingSkillType == null)
-            {
-                return;
-            }
-
-            try
-            {
-                RaiseSkillMethod.Invoke(player, new[] { FarmingSkillType, (object)1f });
-            }
-            catch
-            {
-            }
         }
 
         private static long GetPieceCreator(Piece targetPiece)
@@ -701,63 +502,6 @@ namespace Ravenwood.Biomes
             }
 
             return 0L;
-        }
-
-        private static bool TryClaimObjectOwnership(GameObject targetObject)
-        {
-            if (targetObject == null)
-            {
-                return false;
-            }
-
-            ZNetView targetZNetView = targetObject.GetComponent<ZNetView>();
-            if (targetZNetView == null || !targetZNetView.IsValid())
-            {
-                return true;
-            }
-
-            if (ZNet.instance != null && ZNet.instance.IsServer())
-            {
-                return true;
-            }
-
-            if (!targetZNetView.IsOwner())
-            {
-                targetZNetView.ClaimOwnership();
-            }
-
-            return targetZNetView.IsOwner();
-        }
-
-        private static void DestroyPickedPlayerPlacedMushroom(Pickable pickable)
-        {
-            if (pickable == null || pickable.gameObject == null)
-            {
-                return;
-            }
-
-            GameObject targetObject = pickable.gameObject;
-            if (!TryClaimObjectOwnership(targetObject))
-            {
-                return;
-            }
-
-            Collider[] colliders = targetObject.GetComponentsInChildren<Collider>(true);
-            for (int i = 0; i < colliders.Length; i++)
-            {
-                if (colliders[i] != null)
-                {
-                    colliders[i].enabled = false;
-                }
-            }
-
-            if (ZNetScene.instance != null)
-            {
-                ZNetScene.instance.Destroy(targetObject);
-                return;
-            }
-
-            UnityEngine.Object.Destroy(targetObject);
         }
 
         private static bool IsCultivator(ItemDrop.ItemData item)
@@ -985,30 +729,6 @@ namespace Ravenwood.Biomes
             return cleaned;
         }
 
-        [HarmonyPatch(typeof(Pickable), "Interact")]
-        private static class Pickable_Interact_Patch
-        {
-            private static bool Prefix(Pickable __instance, Humanoid character, bool repeat, ref bool __result)
-            {
-                if (repeat || !IsPlayerPlacedPickableMushroom(__instance))
-                {
-                    return true;
-                }
-
-                if (!TryAddPickedMushroomToInventory(character, __instance))
-                {
-                    __result = false;
-                    return false;
-                }
-
-                PlayPickedMushroomFeedback(__instance);
-                RaisePickedMushroomFarmingSkill(character);
-                DestroyPickedPlayerPlacedMushroom(__instance);
-                __result = true;
-                return false;
-            }
-        }
-
         [HarmonyPatch(typeof(WearNTear), "RPC_Damage")]
         private static class WearNTear_RPC_Damage_Patch
         {
@@ -1102,7 +822,7 @@ namespace Ravenwood.Biomes
                 if (runtime == null)
                 {
                     string prefabName = CleanPrefabName(__instance.gameObject.name);
-                    if (IsCultivatorPickableMushroomName(prefabName))
+                    if (IsRavenwoodPickableMushroomName(prefabName))
                     {
                         TreeFeedbackEffects.PlayPlace(prefabName, __instance.transform.position, __instance.transform.rotation);
                     }
