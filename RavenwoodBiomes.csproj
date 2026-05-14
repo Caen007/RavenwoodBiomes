@@ -23,9 +23,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="CultivatorVegetationManager.cs" />
     <Compile Include="IgnoreAccessModifiers.cs" />
     <Compile Include="PickableMushroomManager.cs" />
     <Compile Include="RavenwoodBiomes.cs" />
+    <Compile Include="RavenwoodPrefabUtility.cs" />
     <Compile Include="TreeConfigFile.cs" />
     <Compile Include="TreeDropEntry.cs" />
     <Compile Include="TreeFeedbackEffects.cs" />
@@ -36,6 +38,7 @@
     <Compile Include="TreeRegistrar.cs" />
     <Compile Include="WorkbenchCustomRecipeConfig.cs" />
     <Compile Include="WorkbenchManager.cs" />
+    <Compile Include="WorldVegetationManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="0Harmony, Version=2.9.0.0, Culture=neutral, processorArchitecture=MSIL">

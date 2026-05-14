@@ -11,7 +11,6 @@ namespace Ravenwood.Biomes
     {
         private const string PlayerPlacedZdoKey = "rvb_playerplaced";
         private const string CultivatorPrefabName = "Cultivator";
-        private const string CultivatorPrefabSuffix = "_Cultivator";
         private const float RemoveRayDistance = 50f;
 
         private static readonly FieldInfo RightItemField = AccessTools.Field(typeof(Humanoid), "m_rightItem");
@@ -31,6 +30,7 @@ namespace Ravenwood.Biomes
         private bool placeFeedbackPlayed;
         private bool indestructible;
         private float lastKnownHealth = -1f;
+        private float lastDamageTime = -1000f;
 
         private WearNTear wear;
         private Destructible destructible;
@@ -228,6 +228,19 @@ namespace Ravenwood.Biomes
                 return;
             }
 
+            if (RavenwoodPrefabUtility.IsCultivatorPrefabName(gameObject.name))
+            {
+                piece.m_groundOnly = false;
+                piece.m_canBeRemoved = true;
+                return;
+            }
+
+            if (!IsPlayerPlaced() && GetPieceCreator(piece) == 0L)
+            {
+                piece.m_canBeRemoved = false;
+                return;
+            }
+
             piece.m_groundOnly = false;
             piece.m_canBeRemoved = true;
         }
@@ -280,8 +293,38 @@ namespace Ravenwood.Biomes
             return !znv.IsValid() || znv.IsOwner();
         }
 
+        public void MarkDamageReceived()
+        {
+            lastDamageTime = Time.time;
+        }
+
+        private bool WasRecentlyDamaged()
+        {
+            return Time.time - lastDamageTime <= 4f;
+        }
+
+        private bool CanUsePositiveHealthDestroyFallback()
+        {
+            if (!WasRecentlyDamaged())
+            {
+                return false;
+            }
+
+            if (RavenwoodPrefabUtility.IsCultivatorPrefabName(gameObject.name))
+            {
+                return false;
+            }
+
+            piece = piece != null ? piece : GetComponent<Piece>();
+            return piece == null;
+        }
+
         private void TryHandleDestroyed(bool fromOnDestroy)
         {
+            if (fromOnDestroy)
+            {
+            }
+
             if (handledDestroyed)
             {
                 return;
@@ -305,30 +348,17 @@ namespace Ravenwood.Biomes
 
             wear = wear != null ? wear : GetComponent<WearNTear>();
             destructible = destructible != null ? destructible : GetComponent<Destructible>();
+            treeBase = treeBase != null ? treeBase : GetComponent<TreeBase>();
 
-            if (wear == null && destructible == null)
+            if (wear == null && destructible == null && treeBase == null)
             {
-                if (!fromOnDestroy)
-                {
-                    return;
-                }
-
                 return;
             }
 
-            if (wear != null)
+            float currentHealth = GetCurrentHealth();
+            if (currentHealth > 0f && !CanUsePositiveHealthDestroyFallback())
             {
-                if (wear.m_health > 0f)
-                {
-                    return;
-                }
-            }
-            else
-            {
-                if (destructible.m_health > 0f)
-                {
-                    return;
-                }
+                return;
             }
 
             handledDestroyed = true;
@@ -578,7 +608,7 @@ namespace Ravenwood.Biomes
             }
 
             TreeRuntimeState runtime = targetPiece.GetComponent<TreeRuntimeState>();
-            if (runtime != null && !runtime.IsPlayerPlaced())
+            if (runtime != null && !runtime.IsPlayerPlaced() && !RavenwoodPrefabUtility.IsCultivatorPrefabName(targetPiece.gameObject.name))
             {
                 return false;
             }
@@ -710,23 +740,7 @@ namespace Ravenwood.Biomes
 
         private static string CleanPrefabName(string prefabName)
         {
-            if (string.IsNullOrWhiteSpace(prefabName))
-            {
-                return string.Empty;
-            }
-
-            string cleaned = prefabName.Trim();
-            if (cleaned.EndsWith("(Clone)", StringComparison.OrdinalIgnoreCase))
-            {
-                cleaned = cleaned.Substring(0, cleaned.Length - "(Clone)".Length).Trim();
-            }
-
-            if (cleaned.EndsWith(CultivatorPrefabSuffix, StringComparison.Ordinal))
-            {
-                cleaned = cleaned.Substring(0, cleaned.Length - CultivatorPrefabSuffix.Length).Trim();
-            }
-
-            return cleaned;
+            return RavenwoodPrefabUtility.GetWorldPrefabName(prefabName);
         }
 
         [HarmonyPatch(typeof(WearNTear), "RPC_Damage")]
@@ -740,6 +754,11 @@ namespace Ravenwood.Biomes
                 }
 
                 TreeRuntimeState runtime = __instance.GetComponent<TreeRuntimeState>();
+                if (runtime != null)
+                {
+                    runtime.MarkDamageReceived();
+                }
+
                 return runtime == null || !runtime.IsIndestructible;
             }
 
@@ -772,6 +791,11 @@ namespace Ravenwood.Biomes
                 }
 
                 TreeRuntimeState runtime = __instance.GetComponent<TreeRuntimeState>();
+                if (runtime != null)
+                {
+                    runtime.MarkDamageReceived();
+                }
+
                 return runtime == null || !runtime.IsIndestructible;
             }
 
@@ -804,7 +828,29 @@ namespace Ravenwood.Biomes
                 }
 
                 TreeRuntimeState runtime = __instance.GetComponent<TreeRuntimeState>();
+                if (runtime != null)
+                {
+                    runtime.MarkDamageReceived();
+                }
+
                 return runtime == null || !runtime.IsIndestructible;
+            }
+
+            private static void Postfix(TreeBase __instance)
+            {
+                if (__instance == null)
+                {
+                    return;
+                }
+
+                TreeRuntimeState runtime = __instance.GetComponent<TreeRuntimeState>();
+                if (runtime == null)
+                {
+                    return;
+                }
+
+                runtime.HandleDamageStateChanged();
+                runtime.TryHandleDestroyed(false);
             }
         }
 

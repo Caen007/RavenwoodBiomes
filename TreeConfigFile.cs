@@ -11,6 +11,10 @@ namespace Ravenwood.Biomes
         private const float DefaultPickableMushroomRespawnMinutes = 240f;
         private static readonly List<TreeDefinition> TreeDefinitions = new List<TreeDefinition>();
         private static ConfigEntry<bool> EnableRavenwoodElixirRecipe;
+        private static ConfigEntry<bool> EnableVegetationBreakDebug;
+        private static ConfigEntry<bool> EnableVegetationBreakDebugVerbose;
+        private static ConfigEntry<int> VegetationBreakDebugMaxLogsPerPrefab;
+        private static ConfigEntry<float> VegetationBreakDebugSuspiciousAliveSeconds;
 
         public sealed class TreeDefinition
         {
@@ -59,6 +63,7 @@ namespace Ravenwood.Biomes
             BuildTreeDefinitions();
             BindTreeConfigs(configFile);
             BindElixirConfig(configFile);
+            BindDebugConfig(configFile);
         }
 
         public static void BuildTreeDefinitions()
@@ -132,6 +137,53 @@ namespace Ravenwood.Biomes
         public static bool IsRavenwoodElixirRecipeEnabled()
         {
             return EnableRavenwoodElixirRecipe != null && EnableRavenwoodElixirRecipe.Value;
+        }
+
+        private static void BindDebugConfig(ConfigFile config)
+        {
+            EnableVegetationBreakDebug = config.Bind(
+                "Debug",
+                "EnableVegetationBreakDebug",
+                true,
+                "Enable temporary Ravenwood vegetation break debug logging. Use only while testing world/YAML vegetation break issues.");
+
+            EnableVegetationBreakDebugVerbose = config.Bind(
+                "Debug",
+                "EnableVegetationBreakDebugVerbose",
+                false,
+                "Enable verbose Ravenwood vegetation debug logs. Leave false for break testing to avoid log spam.");
+
+            VegetationBreakDebugMaxLogsPerPrefab = config.Bind(
+                "Debug",
+                "VegetationBreakDebugMaxLogsPerPrefab",
+                1,
+                "Maximum suspicious break debug lines per prefab and event type. Use 0 for unlimited.");
+
+            VegetationBreakDebugSuspiciousAliveSeconds = config.Bind(
+                "Debug",
+                "VegetationBreakDebugSuspiciousAliveSeconds",
+                1f,
+                "Only log health-positive destroy events within this many seconds after spawn.");
+        }
+
+        public static bool IsVegetationBreakDebugEnabled()
+        {
+            return EnableVegetationBreakDebug != null && EnableVegetationBreakDebug.Value;
+        }
+
+        public static bool IsVegetationBreakDebugVerboseEnabled()
+        {
+            return EnableVegetationBreakDebugVerbose != null && EnableVegetationBreakDebugVerbose.Value;
+        }
+
+        public static int GetVegetationBreakDebugMaxLogsPerPrefab()
+        {
+            return VegetationBreakDebugMaxLogsPerPrefab != null ? Mathf.Max(0, VegetationBreakDebugMaxLogsPerPrefab.Value) : 1;
+        }
+
+        public static float GetVegetationBreakDebugSuspiciousAliveSeconds()
+        {
+            return VegetationBreakDebugSuspiciousAliveSeconds != null ? Mathf.Max(0f, VegetationBreakDebugSuspiciousAliveSeconds.Value) : 1f;
         }
 
         private static void BindTreeConfigs(ConfigFile config)
